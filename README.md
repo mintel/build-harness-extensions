@@ -10,7 +10,7 @@ See https://github.com/cloudposse/build-harness#extending-build-harness-with-tar
 As an example, you could `git-submodule` this into your repo (into the `build-harness-extensions` dir) then use the following:
 
 ```sh
-export HELP_FILTER ?= git/submodules-update|jsonnet|kind|opa|pluto|tanka
+export HELP_FILTER ?= git/submodules-update|jsonnet|kind|kubecfg|kubeval|opa|tanka
 -include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions

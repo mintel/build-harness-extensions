@@ -8,11 +8,17 @@
 #
 set -o errexit
 
+[ "$TRACE" ] && set -x
+
 KIND_K8S_IMAGE=${KIND_K8S_IMAGE:-"kindest/node:v1.16.15"}
 KIND_CLUSTER_NAME=${KIND_CLUSTER_NAME:-"kind"}
 KIND_DOCKER_REGISTRY_NAME=${KIND_DOCKER_REGISTRY_NAME:-"kind-docker-registry"}
 KIND_DOCKER_REGISTRY_PORT=${KIND_DOCKER_REGISTRY_PORT:-5000}
+KIND_DOCKER_HOST_ALIAS=${KIND_DOCKER_HOST_ALIAS:-"docker"}
+KIND_FIX_KUBECONFIG="${KIND_FIX_KUBECONFIG:-"false"}"
 KIND_NGINX_INGRESS_VERSION=${KIND_NGINX_INGRESS_VERSION:-"master"}
+KIND_INSTALL_DOCKER_REGISTRY=${KIND_INSTALL_DOCKER_REGISTRY:-"0"}
+KIND_WAIT=${KIND_WAIT:-"120s"}
 
 docker_registry_start() {
   running="$(docker inspect -f '{{.State.Running}}' "${KIND_DOCKER_REGISTRY_NAME}" 2>/dev/null || true)"
@@ -29,9 +35,12 @@ docker_registry_start() {
 ## Create a cluster with the local registry enabled in container
 create() {
 
-cat <<EOF | kind create cluster --name="${KIND_CLUSTER_NAME}" --image="${KIND_K8S_IMAGE}" --config=-
+
+cat <<EOF | kind create cluster --name="${KIND_CLUSTER_NAME}" --image="${KIND_K8S_IMAGE}" --wait="${KIND_WAIT}" --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  apiServerAddress: 0.0.0.0
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${KIND_DOCKER_REGISTRY_PORT}"]
@@ -53,6 +62,10 @@ nodes:
     protocol: TCP
 EOF
 
+ if [ "$KIND_FIX_KUBECONFIG" = "true" ]; then
+    sed -i -e "s/server: https:\/\/0\.0\.0\.0/server: https:\/\/$KIND_DOCKER_HOST_ALIAS/" "${HOME}/.kube/config"
+  fi
+
   # https://docs.tilt.dev/choosing_clusters.html#discovering-the-registry
   for node in $(kind get nodes --name "${KIND_CLUSTER_NAME}"); do
     kubectl annotate node "${node}" "kind.x-k8s.io/registry=localhost:${KIND_DOCKER_REGISTRY_PORT}";
@@ -65,7 +78,9 @@ EOF
     --timeout=90s \
     deploy/ingress-nginx-controller
 
-  docker_registry_start
+  if [ "${KIND_INSTALL_DOCKER_REGISTRY}" = '1' ]; then
+    docker_registry_start
+  fi
 }
 
 ## Delete the cluster
