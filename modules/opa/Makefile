@@ -23,11 +23,12 @@ opa/clone-policy: opa/check-env
 
 ## Validate manifests
 opa/conftest: opa/clone-policy
-	@echo "opa/conftest"
-	@echo "-------------------------------------------"
-
-	@@for env in $(shell ls $(K8S_RENDERED_DIR)) ; do \
-		echo "env: $$env" ;\
-		conftest test $(K8S_RENDERED_DIR)/$$env/manifests/*.yaml -p $(OPA_POLICY_DIR) || exit 1 ;\
-		echo "-------------------------------------------" ;\
-	done
+	@errs=0;
+	@for env in $(shell ls $(K8S_RENDERED_DIR)) ; do \
+		if ! conftest test --output stdout $(K8S_RENDERED_DIR)/$$env/manifests/*.yaml -p $(OPA_POLICY_DIR); then \
+			errs=$$(( $$errs + 1 )); \
+		fi ;\
+	done ;\
+	if [ "$${errs:-0}" -gt 0 ]; then \
+		exit 1; \
+	fi
