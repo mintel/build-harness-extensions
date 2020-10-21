@@ -1,6 +1,7 @@
 ## OPA (open-policy-agent) helpers
 OPA_POLICY_DIR=/tmp/opa-policy
 OPA_POLICY_BRANCH?=master
+K8S_RENDERED_DIR?=./rendered/environments
 
 # Check opa environment is suitable
 opa/check-env:
@@ -24,8 +25,9 @@ opa/clone-policy: opa/check-env
 opa/conftest: opa/clone-policy
 	@echo "opa/conftest"
 	@echo "-------------------------------------------"
-	@for env in $(shell ls ./rendered/environments) ; do \
+
+	@@for env in $(shell ls $(K8S_RENDERED_DIR)) ; do \
 		echo "env: $$env" ;\
-		conftest test ./rendered/environments/$$env/manifests/*.yaml -p $(OPA_POLICY_DIR) || exit 1 ;\
+		conftest test $(K8S_RENDERED_DIR)/$$env/manifests/*.yaml -p $(OPA_POLICY_DIR) || exit 1 ;\
 		echo "-------------------------------------------" ;\
 	done
