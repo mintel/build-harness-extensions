@@ -22,6 +22,10 @@ opa/clone-policy: opa/check-env
 
 ## Validate manifests
 opa/conftest: opa/clone-policy
+	@echo "opa/conftest"
+	@echo "-------------------------------------------"
 	@for env in $(shell ls ./rendered/environments) ; do \
-		conftest test ./rendered/environments/$$env/manifests/*.yaml -p $(OPA_POLICY_DIR) ;\
+		echo "env: $$env" ;\
+		conftest test ./rendered/environments/$$env/manifests/*.yaml -p $(OPA_POLICY_DIR) || exit 1 ;\
+		echo "-------------------------------------------" ;\
 	done
