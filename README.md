@@ -23,14 +23,18 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   jsonnet/diff                        Diff Jsonnet fils against expected golden 
   jsonnet/diff-help                   Help regarding Jsonnet diff
   jsonnet/gen-golden                  Generate expected golden files from Jsonnet
+  jsonnet/install                     Install packages from jsonnetfile.json with jsonnet-bundler
+  jsonnet/rm-golden                   Remove golden files from Jsonnet
   jsonnet/test                        Run Jsonnet tests
+  jsonnet/update                      Update packages from jsonnetfile.json with jsonnet-bundler
   kind/create                         Start KinD local cluster
   kind/delete                         Delete KinD local cluster
-  kind/up                             Install jsonnetfile.json with jsonnet-bundler
-  opa/clone-policy                    Git clone policies (requires OPA_POLICIES_REPO argument)
+  kubecfg/validate                    Validate manifests
+  kubeval/validate                    Validate manifests
+  opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
   pluto/validate                      Validate manifests
   tanka/fmt                           Format Jsonnet files with tanka
   tanka/generate                      Generate manifests using tanka
   tanka/to-kustomize                  Generate kustomization for tanka-generated manifests
-  ```
+```
