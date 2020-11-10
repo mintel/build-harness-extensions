@@ -1,31 +1,44 @@
 ## Jsonnet helpers
 JSONNET_ARGS=-J ./lib -J ./vendor -J .
 JSONNET_TEST_FILES=$(wildcard ./*/tests/test.jsonnet)
+JSONNET_GOLDEN_FILES=$(wildcard ./*/tests/test-golden.json)
 JSONNET_PHONY_GOLDEN=$(patsubst %.jsonnet,%-golden.json,$(JSONNET_TEST_FILES))
 JSONNET_PHONY_DIFF=$(patsubst %.jsonnet,%.diff,$(JSONNET_TEST_FILES))
 
-## Install jsonnetfile.json with jsonnet-bundler
+.PHONY: jsonnet/install
+## Install packages from jsonnetfile.json with jsonnet-bundler
 jsonnet/install:
 	jb install
 
+.PHONY: jsonnet/update
+## Update packages from jsonnetfile.json with jsonnet-bundler
+jsonnet/update:
+	jb update
+
+.PHONY: jsonnet/test
 ## Run Jsonnet tests
 jsonnet/test: jsonnet/install jsonnet/diff
 
+.PHONY: jsonnet/diff
 ## Diff Jsonnet fils against expected golden 
 jsonnet/diff: jsonnet/diff-help $(JSONNET_PHONY_DIFF)
 
 %.diff: %.jsonnet
 	diff -u $(*)-golden.json <(jsonnet $(JSONNET_ARGS) $(<))
 
-%.parse: %.jsonnet
-	jsonnet $(JSONNET_ARGS) $(<) > /dev/null
-
 %-golden.json: %.jsonnet
 	jsonnet $(JSONNET_ARGS) $(<) > $(@)
 
-## Generate expected golden files from Jsonnet
-jsonnet/gen-golden: $(JSONNET_PHONY_GOLDEN)
+.PHONY: jsonnet/rm-golden
+## Remove golden files from Jsonnet
+jsonnet/rm-golden:
+	rm -f $(JSONNET_GOLDEN_FILES)
 
+.PHONY: jsonnet/gen-golden
+## Generate expected golden files from Jsonnet
+jsonnet/gen-golden: jsonnet/rm-golden $(JSONNET_PHONY_GOLDEN)
+
+.PHONY: jsonnet/diff-help
 ## Help regarding Jsonnet diff
 jsonnet/diff-help:
 	@echo "NOTE: if the 'jsonnet/diff' target fails, review output and run:"
