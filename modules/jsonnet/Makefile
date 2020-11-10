@@ -37,7 +37,7 @@ jsonnet/rm-golden:
 
 .PHONY: jsonnet/gen-golden
 ## Generate expected golden files from Jsonnet
-jsonnet/gen-golden: jsonnet/remove-golden $(JSONNET_PHONY_GOLDEN)
+jsonnet/gen-golden: jsonnet/rm-golden $(JSONNET_PHONY_GOLDEN)
 
 .PHONY: jsonnet/diff-help
 ## Help regarding Jsonnet diff
