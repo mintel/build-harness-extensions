@@ -19,6 +19,8 @@ KIND_FIX_KUBECONFIG="${KIND_FIX_KUBECONFIG:-"false"}"
 KIND_NGINX_INGRESS_VERSION=${KIND_NGINX_INGRESS_VERSION:-"master"}
 KIND_INSTALL_DOCKER_REGISTRY=${KIND_INSTALL_DOCKER_REGISTRY:-"0"}
 KIND_WAIT=${KIND_WAIT:-"120s"}
+KIND_API_SERVER_ADDRESS=${KIND_API_SERVER_ADDRESS:-"0.0.0.0"}
+KIND_API_SERVER_PORT=${KIND_API_SERVER_PORT:-6443}
 
 docker_registry_start() {
   running="$(docker inspect -f '{{.State.Running}}' "${KIND_DOCKER_REGISTRY_NAME}" 2>/dev/null || true)"
@@ -40,7 +42,9 @@ cat <<EOF | kind create cluster --name="${KIND_CLUSTER_NAME}" --image="${KIND_K8
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 networking:
-  apiServerAddress: 0.0.0.0
+  apiServerAddress: ${KIND_API_SERVER_ADDRESS}
+  apiServerPort: ${KIND_API_SERVER_PORT}
+
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${KIND_DOCKER_REGISTRY_PORT}"]
