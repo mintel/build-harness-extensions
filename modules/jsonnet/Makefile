@@ -10,20 +10,24 @@ JSONNETFILE_DIRS=$(dir $(wildcard ./environments/*/jsonnetfile.json) $(wildcard 
 ## Install packages from jsonnetfile.json with jsonnet-bundler
 jsonnet/install:
 	@for dir in $(JSONNETFILE_DIRS); do \
+		set -e; \
 		pushd $$dir >/dev/null; \
 		echo "Running JB install in $$dir"; \
 		jb install; \
 		popd >/dev/null; \
+		set +e; \
 	done
 
 .PHONY: jsonnet/update
 ## Update packages from jsonnetfile.json with jsonnet-bundler
 jsonnet/update:
 	@for dir in $(JSONNETFILE_DIRS); do \
+		set -e; \
 		pushd $$dir >/dev/null; \
 		echo "Running JB update in $$dir"; \
 		jb update; \
 		popd >/dev/null; \
+		set +e; \
 	done
 
 .PHONY: jsonnet/test
