@@ -8,7 +8,7 @@ tanka/fmt:
 	fi
   
 ## Generate manifests using tanka
-tanka/generate:
+tanka/generate: jsonnet/install
 	@echo "Generating rendered manifests in ./rendered" ;\
 	rm -rf $$(pwd)/rendered/ ;\
 	mkdir -p $$(pwd)/rendered/ ;\
