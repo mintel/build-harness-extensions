@@ -4,16 +4,27 @@ JSONNET_TEST_FILES=$(wildcard ./*/tests/test.jsonnet)
 JSONNET_GOLDEN_FILES=$(wildcard ./*/tests/test-golden.json)
 JSONNET_PHONY_GOLDEN=$(patsubst %.jsonnet,%-golden.json,$(JSONNET_TEST_FILES))
 JSONNET_PHONY_DIFF=$(patsubst %.jsonnet,%.diff,$(JSONNET_TEST_FILES))
+JSONNETFILE_DIRS=$(dir $(wildcard ./environments/*/jsonnetfile.json) $(wildcard jsonnetfile.json))
 
 .PHONY: jsonnet/install
 ## Install packages from jsonnetfile.json with jsonnet-bundler
 jsonnet/install:
-	jb install
+	@for dir in $(JSONNETFILE_DIRS); do \
+		pushd $$dir >/dev/null; \
+		echo "Running JB install in $$dir"; \
+		jb install; \
+		popd >/dev/null; \
+	done
 
 .PHONY: jsonnet/update
 ## Update packages from jsonnetfile.json with jsonnet-bundler
 jsonnet/update:
-	jb update
+	@for dir in $(JSONNETFILE_DIRS); do \
+		pushd $$dir >/dev/null; \
+		echo "Running JB update in $$dir"; \
+		jb update; \
+		popd >/dev/null; \
+	done
 
 .PHONY: jsonnet/test
 ## Run Jsonnet tests
