@@ -1,7 +1,7 @@
 ## Jsonnet helpers
 JSONNET_ARGS=-J ./lib -J ./vendor -J .
-JSONNET_TEST_FILES=$(wildcard ./*/tests/test.jsonnet)
-JSONNET_GOLDEN_FILES=$(wildcard ./*/tests/test-golden.json)
+JSONNET_TEST_FILES=$(wildcard ./*/tests/test.jsonnet) $(wildcard ./tests/*.jsonnet)
+JSONNET_GOLDEN_FILES=$(wildcard ./*/tests/test-golden.json) $(wildcard ./tests/*-golden.json)
 JSONNET_PHONY_GOLDEN=$(patsubst %.jsonnet,%-golden.json,$(JSONNET_TEST_FILES))
 JSONNET_PHONY_DIFF=$(patsubst %.jsonnet,%.diff,$(JSONNET_TEST_FILES))
 JSONNETFILE_DIRS=$(dir $(wildcard ./environments/*/jsonnetfile.json) $(wildcard jsonnetfile.json))
