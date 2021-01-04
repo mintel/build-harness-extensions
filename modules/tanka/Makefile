@@ -1,5 +1,6 @@
 ## Tanka helpers
 ENVIRONMENTS=$(shell find environments/ -type f -name "spec.json")
+TANKA_EXPORT_FMT?={{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace}}{{.metadata.namespace }}-{{end}}{{.metadata.name }}
 
 ## Format Jsonnet files with tanka
 tanka/fmt:
@@ -18,7 +19,7 @@ tanka/generate: jsonnet/install
 	    app_path="$$(dirname $$f)" ;\
 	    rendered_path="./rendered/$${app_path}/manifests" ;\
 	    mkdir -p $${rendered_path} ;\
-	    tk export $$(dirname $$f) $${rendered_path} > /dev/null ;\
+	    tk export --format='$(TANKA_EXPORT_FMT)' $$(dirname $$f) $${rendered_path} > /dev/null ;\
 	done
 
 ## Generate kustomization for tanka-generated manifests
