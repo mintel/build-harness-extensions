@@ -1,5 +1,5 @@
 ## Tanka helpers
-ENVIRONMENTS=$(shell find environments/ -type f -name "spec.json")
+ENVIRONMENTS=$(shell find environments/ -type f -name "main.jsonnet")
 TANKA_EXPORT_FMT?={{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace}}{{.metadata.namespace }}-{{end}}{{.metadata.name }}
 
 ## Format Jsonnet files with tanka
@@ -9,27 +9,22 @@ tanka/fmt:
 	fi
   
 ## Generate manifests using tanka
-tanka/generate: jsonnet/install
-	@echo "Generating rendered manifests in ./rendered" ;\
-	rm -rf $$(pwd)/rendered/ ;\
+tanka/generate:
+	@echo ;\
+	echo "Generating rendered manifests in ./rendered" ;\
+	echo "Run 'make jsonnet/[install|update]' beforehand if you require vendor package installation" ;\
+	echo ;\
 	mkdir -p $$(pwd)/rendered/ ;\
 	touch $$(pwd)/rendered/.gitkeep ;\
-
-	@for f in $(ENVIRONMENTS); do \
-	    app_path="$$(dirname $$f)" ;\
-	    rendered_path="./rendered/$${app_path}/manifests" ;\
-	    mkdir -p $${rendered_path} ;\
-	    tk export --format='$(TANKA_EXPORT_FMT)' $$(dirname $$f) $${rendered_path} > /dev/null ;\
-	done
-
-## Generate kustomization for tanka-generated manifests
-tanka/to-kustomize: tanka/generate
-	@for f in $(ENVIRONMENTS); do \
-		app_path="$$(dirname $$f)" ;\
-		rendered_path="./rendered/$${app_path}" ;\
-		echo $${pwd} ;\
-		pushd $${rendered_path} > /dev/null || exit 1 ;\
-		rm -f kustomization.yaml && touch kustomization.yaml ;\
+	for f in $(ENVIRONMENTS); do \
+		env_path="$$(dirname $$f)" ;\
+		echo "Generating $${env_path}" ;\
+		mkdir -p ./rendered/$${env_path} ;\
+		pushd ./rendered/$${env_path} > /dev/null || exit 1 ;\
+		touch kustomization.yaml ;\
+		yq -i eval 'del(.resources)' kustomization.yaml ;\
+		rm -rf ./manifests/*.yaml ;\
+		tk export --format='$(TANKA_EXPORT_FMT)' ../../../$${env_path} ./manifests > /dev/null ;\
  		kustomize edit add resource ./manifests/*.yaml ;\
 		popd > /dev/null || exit 1 ;\
 	done
