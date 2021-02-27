@@ -35,6 +35,5 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   opa/conftest                        Validate manifests
   pluto/validate                      Validate manifests
   tanka/fmt                           Format Jsonnet files with tanka
-  tanka/generate                      Generate manifests using tanka
-  tanka/to-kustomize                  Generate kustomization for tanka-generated manifests
+  tanka/generate                      Generate manifests using tanka including support for kustomize
 ```
