@@ -1,7 +1,6 @@
 ## Pluto helpers
 PLUTO_K8S_VERSION?=v1.16.0
 PLUTO_VERBOSITY?=0
-K8S_RENDERED_DIR?=./rendered/environments
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
 pluto/validate:

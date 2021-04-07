@@ -1,10 +1,11 @@
 ## Kubecfg helpers
+MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
 ## Validate manifests
 kubecfg/validate:
 	@errs=0;
-	@for env in $(shell ls $(K8S_RENDERED_DIR)) ; do \
-		if ! kubecfg validate $(K8S_RENDERED_DIR)/$$env/manifests/*.yaml; then \
+	@for dir in $(MANIFEST_DIRS) ; do \
+		if ! kubecfg validate $$dir/*.yaml; then \
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
