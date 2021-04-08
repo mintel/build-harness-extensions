@@ -1,5 +1,5 @@
 ## Tanka helpers
-ENVIRONMENTS=$(shell find environments/ -type f -name "main.jsonnet")
+ENVIRONMENTS=$(dir $(shell find environments/ -type f -name "main.jsonnet"))
 TANKA_EXPORT_FMT?={{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace}}{{.metadata.namespace }}-{{end}}{{.metadata.name }}
 TANKA_REPO_DIR=$(shell pwd)
 
@@ -17,8 +17,7 @@ tanka/generate:
 	echo ;\
 	mkdir -p $$(pwd)/rendered/ ;\
 	touch $$(pwd)/rendered/.gitkeep ;\
-	for f in $(ENVIRONMENTS); do \
-		env_path="$$(dirname $$f)" ;\
+	for env_path in $(ENVIRONMENTS); do \
 		echo "Generating $${env_path}" ;\
 		mkdir -p ./rendered/$${env_path} ;\
 		pushd ./rendered/$${env_path} > /dev/null || exit 1 ;\
