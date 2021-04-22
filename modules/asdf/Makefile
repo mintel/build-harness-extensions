@@ -21,7 +21,7 @@ ASDF_PKGS = \
 	"terragrunt 0.26.7" \
 	"yq v4.6.2"
 
-## Generate ASDF .tool-versions file
+## Generate asdf .tool-versions file
 asdf/generate:
 	@@rm -f ${ASDF_REPO_DIR}/.tool-versions
 	@@for pkg in $(ASDF_PKGS); do \
