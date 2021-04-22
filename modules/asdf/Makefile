@@ -2,7 +2,7 @@
 ASDF_ROOT := ${HOME}/.asdf
 ASDF_REPO_DIR=$(shell pwd)
 
-## Generate .tool-versions
+## Packages to install
 ASDF_PKGS = \
 	"awscli 2.1.39" \
 	"aws-vault 6.3.0" \
