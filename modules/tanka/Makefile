@@ -5,10 +5,12 @@ TANKA_REPO_DIR=$(shell pwd)
 
 ## Format Jsonnet files with tanka
 tanka/fmt:
-	@@if ! tk fmt . ; then \
-	  exit 1;\
-	fi
-  
+	tk fmt .
+
+## Test formatting of Jsonnet files and exit with non-zero when changes would be made
+tanka/fmt-test:
+	tk fmt --test .
+
 ## Generate manifests using tanka
 tanka/generate:
 	@echo ;\
