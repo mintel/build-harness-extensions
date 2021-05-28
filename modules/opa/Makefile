@@ -1,6 +1,6 @@
 ## OPA (open-policy-agent) helpers
 OPA_POLICY_DIR=/tmp/opa-policy
-OPA_POLICY_BRANCH?=master
+OPA_POLICY_BRANCH?=main
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
 # Check opa environment is suitable
@@ -25,7 +25,7 @@ opa/clone-policy: opa/check-env
 opa/conftest: opa/clone-policy
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
-		if ! conftest test --output stdout $$dir/*.yaml -p $(OPA_POLICY_DIR); then \
+		if ! conftest test --output stdout $$dir/*.yaml -p $(OPA_POLICY_DIR)/opa/kubernetes; then \
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
