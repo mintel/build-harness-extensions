@@ -1,0 +1,13 @@
+## python black helpers
+PY_BLACK = $(shell which black 2>/dev/null)
+
+BLACK ?= $(PY_BLACK)
+
+## Check python files using black
+python/black/check:
+	@$(MAKE) python/lint/announce/black
+	@$(BLACK) --check $(PYTHON_LINT_TARGETS)
+
+## Reformat python files using black
+python/black:
+	@$(BLACK) $(PYTHON_LINT_TARGETS)

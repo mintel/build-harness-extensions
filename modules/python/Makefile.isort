@@ -1,0 +1,15 @@
+## python isort helpers
+PY_ISORT = $(shell which isort 2>/dev/null)
+
+ISORT ?= $(PY_ISORT)
+ISORT_FLAGS ?= --profile black
+# Use black profile
+
+## Check python imports using isort
+python/isort/check:
+	@$(MAKE) python/lint/announce/isort
+	@$(ISORT) $(ISORT_FLAGS) --check-only $(PYTHON_LINT_TARGETS) --diff
+
+## Fix python imports using isort
+python/isort:
+	$(ISORT) $(ISORT_FLAGS) $(PYTHON_LINT_TARGETS)

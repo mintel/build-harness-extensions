@@ -1,0 +1,17 @@
+## python autoflake helpers
+PY_AUTOFLAKE = $(shell which autoflake 2>/dev/null)
+
+AUTOFLAKE ?= $(PY_AUTOFLAKE)
+AUTOFLAKE_OUTPUT ?= reports/python.autoflake
+AUTOFLAKE_FLAGS ?= --remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports
+
+## Check python imports ordering using autoflake
+python/autoflake/check:
+	$(call assert-set,AUTOFLAKE)
+	@$(MAKE) python/lint/announce/autoflake
+	@$(AUTOFLAKE) $(AUTOFLAKE_FLAGS) $(PYTHON_LINT_TARGETS) >| $(AUTOFLAKE_OUTPUT) && ([ ! -s $(AUTOFLAKE_OUTPUT) ] || cat $(AUTOFLAKE_OUTPUT))
+
+## Fix python imports ordering using autoflake
+python/autoflake:
+	$(call assert-set,AUTOFLAKE)
+	@$(AUTOFLAKE) $(AUTOFLAKE_FLAGS) --in-place $(PYTHON_LINT_TARGETS)
