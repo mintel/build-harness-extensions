@@ -32,6 +32,10 @@ else
   fi
 fi
 
+if [ "$ENV" != "local" ]; then
+  dirs=$(echo "$dirs" | grep -v local)
+fi
+
 for env_path in $dirs; do
   echo "Generating $env_path"
   mkdir -p "./rendered/$env_path"
