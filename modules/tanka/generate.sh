@@ -7,7 +7,7 @@ ENV="$2"
 
 TANKA_EXPORT_FMT="{{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace}}{{.metadata.namespace }}-{{end}}{{.metadata.name }}"
 TANKA_REPO_DIR=$(pwd)
-ALL_ENVS=$(find environments -type f -name main.jsonnet -printf '%h\n' | grep "$APP" | grep "$ENV")
+ALL_ENVS=$(find environments -type f -name main.jsonnet -printf '%h\n' | grep "$APP" | grep "$ENV" | sort)
 
 echo
 echo "Generating rendered manifests in ./rendered"
