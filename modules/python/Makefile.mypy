@@ -1,0 +1,5 @@
+## mypy helpers
+
+## Check python files statically using mypy
+python/mypy/check: python/lint/announce/mypy
+	@$(PYTHON) mypy

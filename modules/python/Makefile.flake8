@@ -1,0 +1,16 @@
+## python flake8 helpers
+PY_FLAKE8 = $(shell which flake8 2>/dev/null)
+
+FLAKE8 ?= $(PY_FLAKE8)
+
+FLAKE8_OUTPUT ?= reports/python.flake8
+FLAKE8_FLAGS ?= --select=B,C,E,F,W,T4,B9 --ignore=E203,E231,E266,E501,W503 --output-file=$(FLAKE8_OUTPUT) --tee --exit-zero
+# E203: https://github.com/psf/black/issues/315
+# W503: https://github.com/psf/black/pull/36
+# E501: Let black handle line length
+
+## Check python style against pep8 using flake8
+python/flake8/check:
+	$(call assert-set,FLAKE8)
+	@$(MAKE) python/lint/announce/flake8
+	@$(FLAKE8) $(FLAKE8_FLAGS) $(PYTHON_LINT_TARGETS)

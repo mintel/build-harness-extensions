@@ -19,6 +19,9 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
 ## Targets
 
 ```
+  alembic/current                     Display the current revision of alembic migrations
+  alembic/history                     List changeset scripts in chronological order
+  alembic/upgrade                     Apply alembic migrations to the latest revision
   git/submodules-update               Update submodules
   jsonnet/diff                        Diff Jsonnet fils against expected golden 
   jsonnet/diff-help                   Help regarding Jsonnet diff
@@ -34,6 +37,20 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
   pluto/validate                      Validate manifests
+  poetry/check                        Validate the structure of pyproject.toml
+  poetry/install                      Install Poetry dependencies
+  poetry/lock                         Lock Poetry dependencies
+  poetry/auth/%                       HTTP Basic authenticate to source for Poetry
+  pytest                              Run Python tests with pytest
+  python/autoflake                    Fix python imports ordering using autoflake
+  python/autoflake/check              Check python imports ordering using autoflake
+  python/black                        Reformat python files using black
+  python/black/check                  Check python files using black
+  python/clean                        Clean all unecessary python project files
+  python/flake8                       Check python style against pep8 using flake8
+  python/isort                        Fix python imports using isort
+  python/isort/check                  Check python imports using isort
+  python/mypy/check                   Check python files statically using mypy
   tanka/fmt                           Format Jsonnet files with tanka
   tanka/generate                      Generate manifests using tanka including support for kustomize
 ```

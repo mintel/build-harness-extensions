@@ -1,0 +1,12 @@
+## python lint helpers
+PYTHON_LINT_TARGETS_FIND_FLAGS ?= -name "*.py" -not -path "*/.venv/*" -not -path "*/build-harness/bin/*" -not -path "*/$(notdir $(BUILD_HARNESS_PATH))/modules/*" -not -path "*/.tox/*" -not -path "*/.egg*" -not -path "*/frontend/*" -not -path "*/dist/*" -not -path "*/build/*"
+PYTHON_LINT_TARGETS ?= $(shell find . $(PYTHON_LINT_TARGETS_FIND_FLAGS))
+
+## Python lint announcement
+python/lint/announce/%:
+	@VAR=( $(PYTHON_LINT_TARGETS) ); echo "Checking $${#VAR[@]} files with $*..."
+
+## Python lint discovered targets
+python/lint/targets:
+	@VAR=( $(PYTHON_LINT_TARGETS) ); echo "Discovered $${#VAR[@]} files:"
+	@echo "$$(echo $(PYTHON_LINT_TARGETS) | tr ' ' '\n')"
