@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Helper script to start k3d
 #
@@ -31,12 +31,18 @@ create() {
     k3d registry create "${K3D_DOCKER_REGISTRY_NAME}" --port "${K3D_DOCKER_REGISTRY_PORT}"
   fi
 
-  k3d cluster create "${K3D_CLUSTER_NAME}" \
-    --image="${K3D_K8S_IMAGE}" \
-    --api-port="${K3D_API_SERVER_ADDRESS}:${K3D_API_SERVER_PORT}" \
-    --timeout="${K3D_WAIT}" \
-    --registry-create=false \
-    --registry-use="${K3D_DOCKER_REGISTRY_NAME}:${K3D_DOCKER_REGISTRY_PORT}"
+  local cluster_create_args=(
+    --image="${K3D_K8S_IMAGE}"
+    --api-port="${K3D_API_SERVER_ADDRESS}:${K3D_API_SERVER_PORT}"
+    --timeout="${K3D_WAIT}"
+    --registry-create=false
+  )
+
+  if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = '1' ]; then
+    cluster_create_args+=("--registry-use" "${K3D_DOCKER_REGISTRY_NAME}:${K3D_DOCKER_REGISTRY_PORT}")
+	fi
+
+  k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
 }
 
 ## Delete the cluster
