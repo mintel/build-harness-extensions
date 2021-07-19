@@ -48,8 +48,19 @@ create() {
     cluster_create_args+=("--k3s-server-arg" "--disable=servicelb")
     cluster_create_args+=("--k3s-server-arg" "--disable=traefik")
 	fi
-  set -x
+
   k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
+
+  # Wait for core-components to be available
+  kubectl rollout status deploy/coredns -n kube-system -w
+  kubectl rollout status deploy/metrics-server -n kube-system -w
+  kubectl rollout status deploy/local-path-provisioner -n kube-system -w
+
+  if [ "${K3D_INSTALL_LB}" = 'true' ]; then
+    # sleep as this is an addon
+    sleep 2
+    kubectl rollout status deploy/traefik -n kube-system -w
+  fi
 }
 
 ## Delete the cluster
