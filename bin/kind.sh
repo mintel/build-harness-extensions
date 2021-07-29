@@ -4,7 +4,7 @@
 #
 # Also adds a docker-registry and an ingress to aid local development
 #
-# See https://kind.sigs.k8s.io/docs/user/quick-start/ 
+# See https://kind.sigs.k8s.io/docs/user/quick-start/
 #
 set -o errexit
 
@@ -16,7 +16,7 @@ KIND_DOCKER_REGISTRY_NAME=${KIND_DOCKER_REGISTRY_NAME:-"kind-docker-registry"}
 KIND_DOCKER_REGISTRY_PORT=${KIND_DOCKER_REGISTRY_PORT:-5000}
 KIND_DOCKER_HOST_ALIAS=${KIND_DOCKER_HOST_ALIAS:-"docker"}
 KIND_FIX_KUBECONFIG="${KIND_FIX_KUBECONFIG:-"false"}"
-KIND_NGINX_INGRESS_VERSION=${KIND_NGINX_INGRESS_VERSION:-"master"}
+KIND_NGINX_INGRESS_VERSION=${KIND_NGINX_INGRESS_VERSION:-"main"}
 KIND_INSTALL_DOCKER_REGISTRY=${KIND_INSTALL_DOCKER_REGISTRY:-"0"}
 KIND_WAIT=${KIND_WAIT:-"120s"}
 KIND_API_SERVER_ADDRESS=${KIND_API_SERVER_ADDRESS:-"0.0.0.0"}
@@ -103,7 +103,7 @@ if [ "$#" = "0" ]; then
   usage
   exit 1
 fi
-    
+
 while [ "$1" != "" ]; do
     case $1 in
         create )                create
