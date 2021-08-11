@@ -23,7 +23,7 @@ opa/clone-policy: opa/check-env
 	git clone --depth=1 $(OPA_POLICY_REPO) -b $(OPA_POLICY_BRANCH) $(OPA_POLICY_DIR) ;\
 
 ## Validate manifests
-opa/conftest: opa/clone-policy
+opa/conftest: satoshi/check-deps opa/clone-policy
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
 		if ! conftest test --output stdout $$dir/*.yaml -p $(OPA_POLICY_DIR)/$(OPA_POLICY_SUBDIR); then \
