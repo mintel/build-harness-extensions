@@ -8,7 +8,7 @@ JSONNETFILE_DIRS=$(dir $(wildcard ./environments/*/jsonnetfile.json) $(wildcard 
 
 .PHONY: jsonnet/install
 ## Install packages from jsonnetfile.json with jsonnet-bundler
-jsonnet/install:
+jsonnet/install: satoshi/check-deps
 	@for dir in $(JSONNETFILE_DIRS); do \
 		set -e; \
 		pushd $$dir >/dev/null; \
@@ -20,7 +20,7 @@ jsonnet/install:
 
 .PHONY: jsonnet/update
 ## Update packages from jsonnetfile.json with jsonnet-bundler
-jsonnet/update:
+jsonnet/update: satoshi/check-deps
 	@for dir in $(JSONNETFILE_DIRS); do \
 		set -e; \
 		pushd $$dir >/dev/null; \

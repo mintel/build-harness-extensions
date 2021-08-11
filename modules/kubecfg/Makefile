@@ -1,6 +1,8 @@
 ## Kubecfg helpers
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
+.PHONY: kubecfg/validate
+
 ## Validate manifests
 kubecfg/validate:
 	@errs=0;
