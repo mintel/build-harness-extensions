@@ -8,7 +8,7 @@ REQUIRED_SATOSHI_BINS := asdf conftest helm jb kubectl kustomize opa pluto tk yq
 
 .PHONY: satoshi/check-deps
 
-## Check dependencies for satoshi
+## Check dependencies for Satoshi
 satoshi/check-deps:
 	$(foreach bin,$(REQUIRED_SATOSHI_BINS),\
 		$(if $(shell command -v $(bin) 2> /dev/null),,$(error $(S_RED)[satoshi/check-deps] Please install `$(bin)` using `make asdf/install`)))

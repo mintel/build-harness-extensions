@@ -4,6 +4,8 @@ OPA_POLICY_DIR=/tmp/opa-policy
 OPA_POLICY_SUBDIR=opa/kubernetes
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
+.PHONY: opa/check-env opa/clone-policy opa/conftest
+
 # Check opa environment is suitable
 opa/check-env:
 ifndef OPA_POLICY_REPO

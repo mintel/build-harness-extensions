@@ -2,6 +2,8 @@
 ASDF_ROOT := ${HOME}/.asdf
 ASDF_REPO_DIR=$(shell pwd)
 
+.PHONY: asdf/install
+
 ## Installing required tools
 asdf/install:
 	test -s $(ASDF_ROOT) || git clone https://github.com/asdf-vm/asdf.git $(ASDF_ROOT) && source $(ASDF_ROOT)/asdf.sh ;\

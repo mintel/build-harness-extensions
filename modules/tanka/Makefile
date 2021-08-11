@@ -1,6 +1,8 @@
 ## Tanka helpers
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+.PHONY: tanka/fmt tanka/fmt-test tanka/generate
+
 ## Format Jsonnet files with tanka
 tanka/fmt: satoshi/check-deps
 	tk fmt .

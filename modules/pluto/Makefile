@@ -3,6 +3,8 @@ PLUTO_K8S_VERSION?=v1.16.0
 PLUTO_VERBOSITY?=0
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
+.PHONY: pluto/validate
+
 pluto/validate: satoshi/check-deps
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
