@@ -1,0 +1,25 @@
+## Docker registry helpers
+
+## Check server set for docker registry
+docker/registry/server-check:
+	$(call assert-set,DOCKER_REGISTRY)
+	@echo "Docker registry server found."
+
+## Check authentication credentials set for docker registry
+docker/registry/creds-check:
+	$(call assert-set,DOCKER_REGISTRY_USERNAME)
+	$(call assert-set,DOCKER_REGISTRY_PASSWORD)
+	@echo "Docker registry credentials found."
+
+## Authenticate to docker registry (log in if unauthenticated)
+docker/registry/auth: docker/registry/server-check
+	@/bin/echo -n "Checking docker authentication to ${DOCKER_REGISTRY} .. "
+	@timeout -s SIGKILL 3s $(DOCKER) login ${DOCKER_REGISTRY} >/dev/null 2>&1 \
+		|| (echo "Docker not authenticated to ${GITLAB_REGISTRY}. Will try to log in .."; $(MAKE) docker/registry/login )
+	@echo "Docker authenticated to ${DOCKER_REGISTRY}."
+
+## Log in to docker registry
+docker/registry/login: docker/registry/creds-check
+	@echo "Docker logging in to ${DOCKER_REGISTRY}."
+	@$(DOCKER) login ${DOCKER_REGISTRY} -u ${DOCKER_REGISTRY_USERNAME} -p ${DOCKER_REGISTRY_PASSWORD}
+	@echo "done"

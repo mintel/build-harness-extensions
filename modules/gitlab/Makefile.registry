@@ -1,0 +1,8 @@
+## Gitlab registry helpers
+GITLAB_REGISTRY = registry.gitlab.com
+
+## Authenticate to Gitlab Container registry (log in if unauthenticated)
+gitlab/registry/auth:
+	@DOCKER_REGISTRY=$(GITLAB_REGISTRY) DOCKER_REGISTRY_USERNAME=$(GITLAB_REGISTRY_USERNAME) DOCKER_REGISTRY_PASSWORD=$(GITLAB_REGISTRY_TOKEN) \
+		$(MAKE) docker/registry/auth \
+		|| echo "Provide valid GITLAB_REGISTRY_USERNAME and GITLAB_REGISTRY_TOKEN environment variables to log in to Gitlab Container Registry."
