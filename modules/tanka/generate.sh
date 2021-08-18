@@ -2,6 +2,8 @@
 
 set -e
 
+LC_COLLATE=C
+
 APP="$1"
 ENV="$2"
 
