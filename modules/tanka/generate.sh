@@ -35,15 +35,15 @@ fi
 if [ "$ENV" != "local" ]; then
   dirs=$(echo "$dirs" | grep -v local)
 fi
-
 for env_path in $dirs; do
   echo "Generating $env_path"
   mkdir -p "./rendered/$env_path"
+  touch "./rendered/$env_path/kustomization.yaml"
+  yq -i eval 'del(.resources)' "./rendered/$env_path/kustomization.yaml"
+  rm -f "./rendered/$env_path/manifests/"*.yaml
+  rm -f "./rendered/$env_path/manifests/manifest.json"
+  tk export "./rendered/$env_path/manifests" "$TANKA_REPO_DIR/$env_path" --format="$TANKA_EXPORT_FMT" > /dev/null
   pushd "./rendered/$env_path" > /dev/null || exit 1
-  touch kustomization.yaml
-  yq -i eval 'del(.resources)' kustomization.yaml
-  rm -rf ./manifests/*.yaml
-  tk export --format="$TANKA_EXPORT_FMT" "$TANKA_REPO_DIR/$env_path" ./manifests > /dev/null
   kustomize edit add resource ./manifests/*.yaml
   popd > /dev/null || exit 1
 done
