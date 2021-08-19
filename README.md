@@ -70,6 +70,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   satoshi/update-tools/%              Update Satoshi asdf .tool-versions for a particular toolset e.g. k8s and tf
   sentinel/pull-hashicorp-functions   Install Hashicorp sentinel helper functions
   updater/test                        Dry run for testing argocd-image-updater annotations
+  pipenv/lock                         Lock Pipenv dependencies
   pluto/validate                      Validate manifests
   poetry/check                        Validate the structure of pyproject.toml
   poetry/install                      Install Poetry dependencies
@@ -85,4 +86,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   python/isort                        Fix python imports using isort
   python/isort/check                  Check python imports using isort
   python/mypy/check                   Check python files statically using mypy
+  tanka/fmt                           Format Jsonnet files with tanka
+  tanka/fmt-test                      Test formatting of Jsonnet files and exit with non-zero when changes would be made
+  tanka/generate                      Generate manifests using tanka including support for kustomize
 ```

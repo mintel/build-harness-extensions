@@ -1,7 +1,7 @@
 ## alembic helpers
-PY_ALEMBIC = $(shell which alembic 2>/dev/null)
 
-ALEMBIC ?= $(PY_ALEMBIC)
+# Run as python module so it supports virtual environment managers
+ALEMBIC ?= $(PYTHON) -m alembic
 
 ## Display the current revision
 alembic/current:
