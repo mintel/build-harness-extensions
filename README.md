@@ -34,7 +34,10 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   dbt/partial_test                    Run dbt tests against modeles changed since last compilation
   dbt/seed                            Upload dbt seeds
   dbt/test                            Run dbt tests against all models
+  docker/registry/auth                Authenticate to docker registry (log in if unauthenticated)
+  docker/registry/login               Log in to docker registry
   git/submodules-update               Update submodules
+  gitlab/registry/auth                Authenticate to Gitlab Container registry (log in if unauthenticated)
   grafana/cleanup                     Cleanup docker containers and files associated with grafana/develop
   grafana/develop                     Develop grafana dashboards using live datasources. Mintel internal use only.
   grafana/develop-oss                 Develop grafana dashboards without setting up datasources.
