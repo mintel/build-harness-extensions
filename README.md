@@ -86,7 +86,4 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   python/isort                        Fix python imports using isort
   python/isort/check                  Check python imports using isort
   python/mypy/check                   Check python files statically using mypy
-  tanka/fmt                           Format Jsonnet files with tanka
-  tanka/fmt-test                      Test formatting of Jsonnet files and exit with non-zero when changes would be made
-  tanka/generate                      Generate manifests using tanka including support for kustomize
 ```
