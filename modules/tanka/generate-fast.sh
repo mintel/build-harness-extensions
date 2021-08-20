@@ -7,9 +7,10 @@ ENV="$2"
 
 TANKA_EXPORT_FMT="{{ env.metadata.name}}/{{ env.metadata.labels.env}}/manifests/{{.apiVersion}}.{{.kind}}-{{if.metadata.namespace}}{{.metadata.namespace}}-{{end}}{{.metadata.name}}"
 TANKA_REPO_DIR=$(pwd)
-TANKA_PARALLEL=8
+TANKA_PARALLEL=16
 TANkA_RENDERED_DIR="rendered-fast"
 
+# TODO:  Handle case where env=all and app=all
 ALL_ENVS=$(find environments -type f -name main.jsonnet -printf '%h\n' | grep "$APP" | grep "$ENV" | sort)
 
 echo
@@ -22,31 +23,28 @@ touch "$(pwd)/${TANkA_RENDERED_DIR}/.gitkeep"
 
 # Generate the list of directories to render
 
-if [[ -n "$APP" ]]; then
-  dirs=$(echo "$ALL_ENVS" | grep "$APP")
-  if [[ -n "$ENV" ]]; then
-    dirs=$(echo "$dirs" | grep "$ENV")
-  fi
-else
-  if [[ -n "$ENV" ]]; then
-    dirs=$(echo "$ALL_ENVS" | grep "$ENV")
-  else
-    dirs="$ALL_ENVS"
-  fi
-fi
+# TODO: Merge dirs/all-envs var
+dirs=$(echo "$ALL_ENVS")
 
 if [ "$ENV" != "local" ]; then
   dirs=$(echo "$dirs" | grep -v local)
 fi
-
 
 echo "Removing old generated manifests (preserving image tagdata)..."
 echo
 
 for env_path in $dirs; do
   rendered_env_dir="${TANkA_RENDERED_DIR}/${env_path}"
+  kustomization="./${rendered_env_dir}/kustomization.yaml"
+ 
   mkdir -p "${rendered_env_dir}"
-  touch "${rendered_env_dir}/kustomization.yaml"
+  if [ ! -f "${kustomization}" ] ; then
+cat <<EOF > "${kustomization}"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+EOF
+  fi
+
   rm -f "${rendered_env_dir}/manifests/"*.yaml
   rm -f "${rendered_env_dir}/manifests/manifest.json"
 done
@@ -54,10 +52,16 @@ done
 echo "Generating new manifests from tanka..."
 echo
 
+# TODO: Build selector
+#   all envs (basename)
+#   if app!="", add app 
+   #--selector="env in(aws.dev,aws.qa,aws.prod)" \
+# --selector="env in(aws.dev),name in(cpg-data-hub)" \
+
 tk export \
-   --selector="env in(aws.dev,aws.qa,aws.prod)" \
    --recursive \
    --parallel=${TANKA_PARALLEL} \
+   --selector="env notin(local)" \
    --merge \
    ${TANkA_RENDERED_DIR}/environments \
   ./environments \
@@ -68,10 +72,10 @@ echo
 
 for env_path in $dirs; do
   rendered_env_dir="${TANkA_RENDERED_DIR}/${env_path}"
-  yq -i eval 'del(.resources)' "${rendered_env_dir}/kustomization.yaml"
-  pushd "${rendered_env_dir}" > /dev/null || exit 1
-  kustomize edit add resource ./manifests/*.yaml
-  popd > /dev/null || exit 1
+  kustomization="./${rendered_env_dir}/kustomization.yaml"
+  yq -i eval 'del(.resources)' "${kustomization}"
+  echo "resources:" >> "${kustomization}"
+  ls -1 ${rendered_env_dir}/manifests/*.yaml | tr '\n' '\0' | xargs -0 -n 1 basename | xargs -I{} echo "- ./manifests/{}" >> "${kustomization}"
 done
 
 echo "Done!"
