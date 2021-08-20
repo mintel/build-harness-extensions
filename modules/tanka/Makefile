@@ -14,3 +14,7 @@ tanka/fmt-test: satoshi/check-deps
 ## Generate manifests using tanka
 tanka/generate: satoshi/check-deps
 	$(MAKEFILE_PATH)/generate.sh $(app) $(env)
+
+## Generate manifests using tanka
+tanka/generate-fast: satoshi/check-deps
+	$(MAKEFILE_PATH)/generate-fast.sh $(app) $(env)
