@@ -24,7 +24,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   alembic/upgrade                     Apply alembic migrations to the latest revision
   asdf/install                        Installing required tools
   git/submodules-update               Update submodules
-  jsonnet/diff                        Diff Jsonnet fils against expected golden 
+  jsonnet/diff                        Diff Jsonnet fils against expected golden
   jsonnet/diff-help                   Help regarding Jsonnet diff
   jsonnet/gen-golden                  Generate expected golden files from Jsonnet
   jsonnet/install                     Install packages from jsonnetfile.json with jsonnet-bundler

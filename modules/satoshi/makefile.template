@@ -1,5 +1,5 @@
 #
-# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile' 
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile'
 #
 export HELP_FILTER ?= asdf|jsonnet|kind|kubecfg|kubeval|opa|pluto|satoshi|tanka
 -include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)

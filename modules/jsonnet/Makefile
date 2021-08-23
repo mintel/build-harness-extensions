@@ -35,7 +35,7 @@ jsonnet/update: satoshi/check-deps
 jsonnet/test: jsonnet/install jsonnet/diff
 
 .PHONY: jsonnet/diff
-## Diff Jsonnet fils against expected golden 
+## Diff Jsonnet fils against expected golden
 jsonnet/diff: jsonnet/diff-help $(JSONNET_PHONY_DIFF)
 
 %.diff: %.jsonnet
