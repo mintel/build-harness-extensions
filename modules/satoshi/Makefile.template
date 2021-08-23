@@ -1,0 +1,24 @@
+#
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile' 
+#
+export HELP_FILTER ?= asdf|jsonnet|kind|kubecfg|kubeval|opa|pluto|satoshi|tanka
+-include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
+export BUILD_HARNESS_PATH ?= $(shell 'pwd')
+export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
+
+
+## Init build-harness and build-harness-extensions
+.PHONY: bootstrap
+bootstrap:
+	git init
+	make init
+	if [ ! -d "./build-harness-extensions" ]; then git submodule add https://github.com/mintel/build-harness-extensions.git build-harness-extensions ; fi
+	git submodule update --init --recursive
+	exit 0
+
+## Install tools and initial jsonnet-deps
+.PHONY: install
+install:
+	make asdf/install
+	make jsonnet/install
+	exit 0
