@@ -22,6 +22,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   alembic/current                     Display the current revision of alembic migrations
   alembic/history                     List changeset scripts in chronological order
   alembic/upgrade                     Apply alembic migrations to the latest revision
+  asdf/install                        Installing required tools
   git/submodules-update               Update submodules
   jsonnet/diff                        Diff Jsonnet fils against expected golden 
   jsonnet/diff-help                   Help regarding Jsonnet diff
@@ -36,6 +37,10 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   kubeval/validate                    Validate manifests
   opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
+  satoshi/check-asdf-dep              Check dependencies (installer) for Satoshi
+  satoshi/check-deps                  Check dependencies for Satoshi
+  satoshi/update-makefile             Update Satoshi Makefile
+  satoshi/update-tools                Update Satoshi asdf .tool-versions
   pluto/validate                      Validate manifests
   poetry/check                        Validate the structure of pyproject.toml
   poetry/install                      Install Poetry dependencies
@@ -52,5 +57,6 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   python/isort/check                  Check python imports using isort
   python/mypy/check                   Check python files statically using mypy
   tanka/fmt                           Format Jsonnet files with tanka
+  tanka/fmt-test                      Test formatting of Jsonnet files and exit with non-zero when changes would be made
   tanka/generate                      Generate manifests using tanka including support for kustomize
 ```
