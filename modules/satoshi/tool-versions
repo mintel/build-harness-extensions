@@ -1,0 +1,11 @@
+# asdf tools
+conftest v0.27.0
+helm 3.6.3
+jb 0.4.0
+jsonnet 0.17.0
+kubectl 1.19.9
+kustomize 4.2.0
+opa 0.31.0
+pluto 4.3.0
+tanka 0.17.2
+yq v4.12.0
