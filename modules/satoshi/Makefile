@@ -22,7 +22,7 @@ endif
 
 ## Update Satoshi Makefile
 satoshi/update-makefile:
-	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/update-satoshi-makefile-template/modules/satoshi/makefile.template")
+	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/makefile.template")
 
 ## Update Satoshi asdf .tool-versions
 satoshi/update-tools:
