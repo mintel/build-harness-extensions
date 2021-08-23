@@ -6,7 +6,7 @@ S_BLD := $(shell tput bold)
 
 REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq
 
-.PHONY: satoshi/check-deps satoshi/check-asdf-dep
+.PHONY: satoshi/check-deps satoshi/check-asdf-dep satoshi/update-makefile satoshi/update-tools
 
 # Skip checks if running in CI for now (binaries not installed by asdf)
 ifndef CI
@@ -22,7 +22,7 @@ endif
 
 ## Update Satoshi Makefile
 satoshi/update-makefile:
-	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/Makefile.template")
+	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/update-satoshi-makefile-template/modules/satoshi/makefile.template")
 
 ## Update Satoshi asdf .tool-versions
 satoshi/update-tools:
