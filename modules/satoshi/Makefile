@@ -6,6 +6,19 @@ S_BLD := $(shell tput bold)
 
 REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq
 
+export define SATOSHI_ASDF_TOOL_VERSIONS
+conftest v0.27.0
+helm 3.6.3
+jb 0.4.0
+jsonnet 0.17.0
+kubectl 1.19.9
+kustomize 4.2.0
+opa 0.31.0
+pluto 4.3.0
+tanka 0.17.2
+yq v4.12.0
+endef
+
 .PHONY: satoshi/check-deps satoshi/check-asdf-dep
 
 # Skip checks if running in CI for now (binaries not installed by asdf)
@@ -19,3 +32,8 @@ satoshi/check-deps: satoshi/check-asdf-dep
 satoshi/check-asdf-dep:
 	$(if $(shell command -v asdf 2> /dev/null),,$(error $(S_RED)[satoshi/check-asdf-dep] Please install `asdf` (https://github.com/asdf-vm/asdf)$(S_RST)))
 endif
+
+## Update Satoshi asdf .tool-versions
+satoshi/update-tools:
+	@echo "$$SATOSHI_ASDF_TOOL_VERSIONS" > .tool-versions
+	@make asdf/install
