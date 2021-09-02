@@ -38,14 +38,18 @@ if [ "$ENV" != "local" ]; then
   dirs=$(echo "$dirs" | grep -v local)
 fi
 for env_path in $dirs; do
-  echo "Generating $env_path"
-  mkdir -p "./rendered/$env_path"
-  touch "./rendered/$env_path/kustomization.yaml"
-  yq -i eval 'del(.resources)' "./rendered/$env_path/kustomization.yaml"
-  rm -f "./rendered/$env_path/manifests/"*.yaml
-  rm -f "./rendered/$env_path/manifests/manifest.json"
-  tk export "./rendered/$env_path/manifests" "$TANKA_REPO_DIR/$env_path" --format="$TANKA_EXPORT_FMT" > /dev/null
-  pushd "./rendered/$env_path" > /dev/null || exit 1
-  kustomize edit add resource ./manifests/*.yaml
-  popd > /dev/null || exit 1
+  cluster_envs=$(tk env list --names | grep "$env_path")
+  for cluster_env in $cluster_envs; do
+    echo "Generating $cluster_env"
+    mkdir -p "./rendered/$cluster_env"
+    touch "./rendered/$cluster_env/kustomization.yaml"
+    yq -i eval 'del(.resources)' "./rendered/$cluster_env/kustomization.yaml"
+    rm -f "./rendered/$cluster_env/manifests/"*.yaml
+    rm -f "./rendered/$cluster_env/manifests/manifest.json"
+    tk export "./rendered/$cluster_env/manifests" "$TANKA_REPO_DIR/$env_path" --format="$TANKA_EXPORT_FMT" --name="$cluster_env" > /dev/null
+    pushd "./rendered/$cluster_env" > /dev/null || exit 1
+    kustomize edit add resource ./manifests/*.yaml
+    popd > /dev/null || exit 1
+    echo
+  done
 done
