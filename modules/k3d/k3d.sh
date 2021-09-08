@@ -10,25 +10,28 @@ set -o errexit
 
 [ "$TRACE" ] && set -x
 
-K3D_K8S_IMAGE=${K3D_K8S_IMAGE:-"rancher/k3s:v1.20.4-k3s1"}
+K3D_K8S_IMAGE=${K3D_K8S_IMAGE:-"rancher/k3s:v1.22.1-rc1-k3s1"}
 K3D_CLUSTER_NAME=${K3D_CLUSTER_NAME:-"local"}
-K3D_DOCKER_REGISTRY_NAME=${K3D_DOCKER_REGISTRY_NAME:-"registry.localhost"}
-K3D_DOCKER_REGISTRY_PORT=${K3D_DOCKER_REGISTRY_PORT:-5000}
+K3D_DOCKER_REGISTRY_NAME=${K3D_DOCKER_REGISTRY_NAME:-"${K3D_CLUSTER_NAME}"}
+K3D_DOCKER_REGISTRY_PORT=${K3D_DOCKER_REGISTRY_PORT:-"5000"}
 K3D_INSTALL_DOCKER_REGISTRY=${K3D_INSTALL_DOCKER_REGISTRY:-"true"}
+K3D_DELETE_DOCKER_REGISTRY=${K3D_DELETE_DOCKER_REGISTRY:-"false"}
 K3D_INSTALL_LB=${K3D_INSTALL_LB:-"true"}
 K3D_WAIT=${K3D_WAIT:-"120s"}
 K3D_API_SERVER_ADDRESS=${K3D_API_SERVER_ADDRESS:-"0.0.0.0"}
 K3D_API_SERVER_PORT=${K3D_API_SERVER_PORT:-6443}
+K3D_USE_EXISTING_NETWORK=${K3D_USE_EXISTING_NETWORK:-"true"}
+K3D_NETWORK=${K3D_NETWORK:-"mintelnet"}
+
 
 ## Create a cluster with the local registry enabled in container
 create() {
-
-  if [ "$(k3d cluster list | grep -o "${K3D_CLUSTER_NAME}")" ]; then
+  if [ "$(k3d cluster list | grep -o -E "^${K3D_CLUSTER_NAME}")" ]; then
     echo "K3d cluster ${K3D_CLUSTER_NAME} already exists - you may want to cleanup with: make k3d/delete"
     exit 1
   fi
 
-  if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ] && [ ! "$(k3d registry list | grep -o "${K3D_DOCKER_REGISTRY_NAME}")" ]; then
+  if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ] && [ ! "$(k3d registry list | grep -o -E "^k3d-${K3D_DOCKER_REGISTRY_NAME}")" ]; then
     k3d registry create "${K3D_DOCKER_REGISTRY_NAME}" --port "${K3D_DOCKER_REGISTRY_PORT}"
   fi
 
@@ -40,8 +43,12 @@ create() {
   )
 
   if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ]; then
-    cluster_create_args+=("--registry-use" "${K3D_DOCKER_REGISTRY_NAME}:${K3D_DOCKER_REGISTRY_PORT}")
+    cluster_create_args+=("--registry-use" "${K3D_DOCKER_REGISTRY_NAME}")
 	fi
+
+  if [ "${K3D_USE_EXISTING_NETWORK}" = 'true' ] && [ -n "${K3D_NETWORK}" ] ; then
+    cluster_create_args+=("--network" "${K3D_NETWORK}")
+  fi
 
   if [ "${K3D_INSTALL_LB}" = 'false' ]; then
     cluster_create_args+=("--no-lb")
@@ -66,6 +73,10 @@ create() {
 ## Delete the cluster
 delete() {
   k3d cluster delete "${K3D_CLUSTER_NAME}"
+
+  if [ "${K3D_DELETE_DOCKER_REGISTRY}" = 'true' ]; then
+    k3d registry rm "k3d-${K3D_DOCKER_REGISTRY_NAME}"
+  fi
 }
 
 ## Display usage

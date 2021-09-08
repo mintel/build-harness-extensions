@@ -1,7 +1,6 @@
 ## KinD Helpers
 export KIND_INSTALL_DOCKER_REGISTRY?=1
 
-<<<<<<< HEAD
 .PHONY: kind/create kind/delete
 
 ## Create KinD local cluster
