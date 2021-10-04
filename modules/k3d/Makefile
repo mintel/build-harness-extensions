@@ -7,4 +7,3 @@ k3d/create:
 ## Delete a Kubernetes k3d local cluster
 k3d/delete:
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k3d/k3d.sh delete
-
