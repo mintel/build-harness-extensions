@@ -10,6 +10,11 @@ set -o errexit
 
 [ "$TRACE" ] && set -x
 
+
+echo "DEPRECATED"
+echo "DEPRECATED: Please use 'make k3d/create' instead"
+echo "DEPRECATED"
+
 KIND_K8S_IMAGE=${KIND_K8S_IMAGE:-"kindest/node:v1.19.7"}
 KIND_CLUSTER_NAME=${KIND_CLUSTER_NAME:-"kind"}
 KIND_DOCKER_REGISTRY_NAME=${KIND_DOCKER_REGISTRY_NAME:-"kind-docker-registry"}
