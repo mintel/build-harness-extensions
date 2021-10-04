@@ -1,5 +1,5 @@
 ## Pluto helpers
-PLUTO_K8S_VERSION?=v1.16.0
+PLUTO_K8S_VERSION?=v1.19.0
 PLUTO_VERBOSITY?=0
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
 
