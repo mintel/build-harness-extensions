@@ -1,0 +1,7 @@
+dbt/sqlfluff/fmt:
+	sqlfluff fmt
+.PHONY: dbt/sqlfluff/fmt
+
+dbt/sqlfluff/lint:
+	sqlfluff lint
+.PHONY: dbt/sqlfluff/lint
