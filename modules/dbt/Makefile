@@ -4,19 +4,22 @@ dbt/init:
 	dbt deps
 .PHONY: dbt/init
 
-# Compile dbt code and error out on any warnings
+# Compile all dbt code and error out on any warnings
 dbt/compile:
-	dbt --warn-error compile
+	dbt compile --warn-error
 .PHONY: dbt/compile
+
+dbt/target/%:
+	dbt compile --strict
 
 # Generate docs from any existing model definitions and configurations
 dbt/docs:
 	dbt docs generate
 .PHONY: dbt/docs
 
-# Run all dbt models
-dbt/run:
-	dbt run
+# Run all dbt models, and pre-parse the input
+dbt/run dbt/target/manifest.json target/graph.gpickle target/partial_parse.msgpack:
+	dbt --partial-parse run
 .PHONY: dbt/run
 
 # Upload all dbt seeds
