@@ -23,6 +23,15 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   alembic/history                     List changeset scripts in chronological order
   alembic/upgrade                     Apply alembic migrations to the latest revision
   asdf/install                        Installing required tools
+  dbt/clean                           Clean up dbt logs and compiled code
+  dbt/compile                         Compile dbt code for future use
+  dbt/docs                            Generate documentation for your dbt project
+  dbt/init                            Installing dbt dependencies
+  dbt/run                             Run dbt against all models
+  dbt/sqlfluff/fmt                    Reformat dbt code using sqlfluff
+  dbt/sqlfluff/lint                   Check dbt code using sqlfluff
+  dbt/seed                            Upload dbt seeds
+  dbt/tests                           Run dbt tests against all models
   git/submodules-update               Update submodules
   jsonnet/diff                        Diff Jsonnet fils against expected golden
   jsonnet/diff-help                   Help regarding Jsonnet diff
