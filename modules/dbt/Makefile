@@ -4,15 +4,15 @@ dbt/init:
 	dbt deps
 .PHONY: dbt/init
 
-# Compile all dbt code in strict mode
+# Compile all dbt code and warn on errors
 dbt/compile:
-	dbt compile --strict
+	dbt --warn-error compile
 .PHONY: dbt/compile
 
 DBT_PRE_COMPILED = target/manifest.json target/graph.gpickle target/partial_parse.msgpack
 
 ${DBT_PRE_COMPILED}:
-	dbt compile --strict
+	dbt --warn-error compile
 
 # Run all dbt models
 dbt/run: ${DBT_PRE_COMPILED}
