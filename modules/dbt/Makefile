@@ -4,32 +4,44 @@ dbt/init:
 	dbt deps
 .PHONY: dbt/init
 
-# Compile all dbt code and error out on any warnings
+# Compile all dbt code in strict mode
 dbt/compile:
-	dbt compile --warn-error
+	dbt compile --strict
 .PHONY: dbt/compile
 
-dbt/target/%:
+DBT_PRE_COMPILED = target/manifest.json target/graph.gpickle target/partial_parse.msgpack
+
+${DBT_PRE_COMPILED}:
 	dbt compile --strict
 
-# Generate docs from any existing model definitions and configurations
-dbt/docs:
-	dbt docs generate
-.PHONY: dbt/docs
-
-# Run all dbt models, and pre-parse the input
-dbt/run dbt/target/manifest.json target/graph.gpickle target/partial_parse.msgpack:
+# Run all dbt models
+dbt/run: ${DBT_PRE_COMPILED}
 	dbt --partial-parse run
 .PHONY: dbt/run
 
+# Generate docs from all existing model definitions and configurations
+dbt/docs: ${DBT_PRE_COMPILED}
+	dbt --partial-parse docs generate
+.PHONY: dbt/docs
+
 # Upload all dbt seeds
-dbt/seed:
-	dbt seed
+dbt/seed: ${DBT_PRE_COMPILED}
+	dbt --partial-parse seed
 .PHONY: dbt/seed
 
 # Run tests for all dbt models
-dbt/test:
-	dbt test
+dbt/test: ${DBT_PRE_COMPILED}
+	dbt --partial-parse test
+.PHONY: dbt/test
+
+# Run only the models changed since last compilation
+dbt/partial_run: ${DBT_PRE_COMPILED}
+	dbt --partial-parse run -m @state:modified --state .
+.PHONY: dbt/partial_run
+
+# Run only tests on models models changed since last compilation
+dbt/partial_test: ${DBT_PRE_COMPILED}
+	dbt --partial-parse test -m @state:modified --state .
 .PHONY: dbt/test
 
 # Clean up dbt logs and compiled sql in target/
