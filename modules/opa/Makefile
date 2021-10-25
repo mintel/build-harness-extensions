@@ -2,7 +2,7 @@
 OPA_POLICY_BRANCH?=main
 OPA_POLICY_DIR=/tmp/opa-policy
 OPA_POLICY_SUBDIR=opa/kubernetes
-MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
+MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
 .PHONY: opa/check-env opa/clone-policy opa/conftest
 

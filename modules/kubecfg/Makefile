@@ -1,5 +1,5 @@
 ## Kubecfg helpers
-MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests)
+MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
 .PHONY: kubecfg/validate
 
