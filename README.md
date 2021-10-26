@@ -30,8 +30,10 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   dbt/run                             Run dbt against all models
   dbt/sqlfluff/fmt                    Reformat dbt code using sqlfluff
   dbt/sqlfluff/lint                   Check dbt code using sqlfluff
+  dbt/partial_run                     Run dbt against modeles changed since last compilation
+  dbt/partial_test                    Run dbt tests against modeles changed since last compilation
   dbt/seed                            Upload dbt seeds
-  dbt/tests                           Run dbt tests against all models
+  dbt/test                            Run dbt tests against all models
   git/submodules-update               Update submodules
   jsonnet/diff                        Diff Jsonnet fils against expected golden
   jsonnet/diff-help                   Help regarding Jsonnet diff
