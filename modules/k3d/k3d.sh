@@ -20,7 +20,6 @@ K3D_INSTALL_LB=${K3D_INSTALL_LB:-"true"}
 K3D_WAIT=${K3D_WAIT:-"120s"}
 K3D_API_SERVER_ADDRESS=${K3D_API_SERVER_ADDRESS:-"0.0.0.0"}
 K3D_API_SERVER_PORT=${K3D_API_SERVER_PORT:-6443}
-K3D_USE_EXISTING_NETWORK=${K3D_USE_EXISTING_NETWORK:-"true"}
 K3D_NETWORK=${K3D_NETWORK:-"mintelnet"}
 
 
@@ -46,8 +45,12 @@ create() {
     cluster_create_args+=("--registry-use" "${K3D_DOCKER_REGISTRY_NAME}")
 	fi
 
-  if [ "${K3D_USE_EXISTING_NETWORK}" = 'true' ] && [ -n "${K3D_NETWORK}" ] ; then
-    cluster_create_args+=("--network" "${K3D_NETWORK}")
+  if [ -n "${K3D_NETWORK}" ] ; then
+    if [ $(docker network ls --format {{.Name}} | grep -w "${K3D_NETWORK}") ]; then
+      cluster_create_args+=("--network" "${K3D_NETWORK}")
+    else
+      echo "Specified docker network ${K3D_NETWORK} does not exist. Skipping!"
+    fi
   fi
 
   if [ "${K3D_INSTALL_LB}" = 'false' ]; then
@@ -65,7 +68,7 @@ create() {
 
   if [ "${K3D_INSTALL_LB}" = 'true' ]; then
     # sleep as this is an addon
-    sleep 2
+    sleep 5
     kubectl rollout status deploy/traefik -n kube-system -w
   fi
 }
