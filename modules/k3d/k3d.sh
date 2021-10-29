@@ -38,6 +38,9 @@ create() {
   local cluster_create_args=(
     --image="${K3D_K8S_IMAGE}"
     --api-port="${K3D_API_SERVER_ADDRESS}:${K3D_API_SERVER_PORT}"
+    # Map host port 8080->80, 8443->443
+    --port "8080:80@loadbalancer"
+    --port "8443:443@loadbalancer"
     --timeout="${K3D_WAIT}"
   )
 
@@ -53,11 +56,8 @@ create() {
     fi
   fi
 
-  if [ "${K3D_INSTALL_LB}" = 'false' ]; then
-    cluster_create_args+=("--no-lb")
-    cluster_create_args+=("--k3s-server-arg" "--disable=servicelb")
-    cluster_create_args+=("--k3s-server-arg" "--disable=traefik")
-	fi
+  # Disable built-in traefik (we install v2 later)
+  cluster_create_args+=("--k3s-arg" "--disable=traefik@server:0")
 
   k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
 
@@ -67,9 +67,9 @@ create() {
   kubectl rollout status deploy/local-path-provisioner -n kube-system -w
 
   if [ "${K3D_INSTALL_LB}" = 'true' ]; then
-    # sleep as this is an addon
-    sleep 5
-    kubectl rollout status deploy/traefik -n kube-system -w
+    kubectl create ns traefik
+    helm repo add traefik https://helm.traefik.io/traefik
+    helm install --namespace=traefik traefik traefik/traefik
   fi
 }
 
