@@ -5,6 +5,7 @@ conftest v0.28.1
 helm 3.7.0
 jb 0.4.0
 jsonnet 0.17.0
+k3d 5.0.2
 kubectl 1.19.9
 kustomize 4.2.0
 opa 0.33.0
