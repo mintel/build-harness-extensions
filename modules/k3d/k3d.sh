@@ -10,9 +10,10 @@ set -o errexit
 
 [ "$TRACE" ] && set -x
 
+K3D_PREFIX="k3d"
 K3D_K8S_IMAGE=${K3D_K8S_IMAGE:-"rancher/k3s:v1.20.11-k3s2"}
 K3D_CLUSTER_NAME=${K3D_CLUSTER_NAME:-"local"}
-K3D_DOCKER_REGISTRY_NAME=${K3D_DOCKER_REGISTRY_NAME:-"${K3D_CLUSTER_NAME}"}
+K3D_DOCKER_REGISTRY_NAME=${K3D_DOCKER_REGISTRY_NAME:-"default.localhost"}
 K3D_DOCKER_REGISTRY_PORT=${K3D_DOCKER_REGISTRY_PORT:-"5000"}
 K3D_INSTALL_DOCKER_REGISTRY=${K3D_INSTALL_DOCKER_REGISTRY:-"true"}
 K3D_DELETE_DOCKER_REGISTRY=${K3D_DELETE_DOCKER_REGISTRY:-"false"}
@@ -30,7 +31,7 @@ create() {
     exit 1
   fi
 
-  if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ] && [ ! "$(k3d registry list | grep -o -E "^k3d-${K3D_DOCKER_REGISTRY_NAME}")" ]; then
+  if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ] && [ ! "$(k3d registry list | grep -o -E "^${K3D_PREFIX}-${K3D_DOCKER_REGISTRY_NAME}")" ]; then
     k3d registry create "${K3D_DOCKER_REGISTRY_NAME}" --port "${K3D_DOCKER_REGISTRY_PORT}"
   fi
 
@@ -38,11 +39,10 @@ create() {
     --image="${K3D_K8S_IMAGE}"
     --api-port="${K3D_API_SERVER_ADDRESS}:${K3D_API_SERVER_PORT}"
     --timeout="${K3D_WAIT}"
-    --registry-create=false
   )
 
   if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ]; then
-    cluster_create_args+=("--registry-use" "${K3D_DOCKER_REGISTRY_NAME}")
+    cluster_create_args+=("--registry-use" "${K3D_PREFIX}-${K3D_DOCKER_REGISTRY_NAME}:${K3D_DOCKER_REGISTRY_PORT}")
 	fi
 
   if [ -n "${K3D_NETWORK}" ] ; then
