@@ -28,7 +28,9 @@ K3D_NETWORK=${K3D_NETWORK:-"mintelnet"}
 create() {
   if [ "$(k3d cluster list | grep -o -E "^${K3D_CLUSTER_NAME}")" ]; then
     echo "K3d cluster ${K3D_CLUSTER_NAME} already exists - you may want to cleanup with: make k3d/delete"
-    exit 1
+    echo "Ensuring all namespaces in current repo have been created ....."
+    create_namespaces
+    exit 0
   fi
 
   if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ] && [ ! "$(k3d registry list | grep -o -E "^${K3D_PREFIX}-${K3D_DOCKER_REGISTRY_NAME}")" ]; then
@@ -71,6 +73,8 @@ create() {
     sleep 5
     kubectl rollout status deploy/traefik -n kube-system -w
   fi
+
+  create_namespaces
 }
 
 ## Delete the cluster
@@ -82,10 +86,20 @@ delete() {
   fi
 }
 
+create_namespaces() {
+  namespaces=$(ack -h --nobreak "namespace: '.*'," lib/*/*.libsonnet | sed -n "s/namespace: '\(.*\)',/\1/ p" | awk '{$1=$1};1' | sort | uniq)
+  set +e
+  while IFS= read -r namespace; do
+    echo "Creating namespace $namespace ....."
+    kubectl create namespace $namespace
+  done <<< "$namespaces"
+  set -e
+}
+
 ## Display usage
 usage()
 {
-    echo "usage: $0 [create|delete]"
+  echo "usage: $0 [create|delete]"
 }
 
 ## Argument parsing
@@ -93,7 +107,7 @@ if [ "$#" = "0" ]; then
   usage
   exit 1
 fi
-    
+
 while [ "$1" != "" ]; do
     case $1 in
         create )                create
