@@ -14,3 +14,7 @@ tanka/fmt-test: satoshi/check-deps
 ## Generate manifests using tanka
 tanka/generate: satoshi/check-deps
 	$(MAKEFILE_PATH)/generate.sh $(app) $(env)
+
+## Create required namespaces in local cluster
+tanka/create-ns:
+	$(MAKEFILE_PATH)/create-ns.sh

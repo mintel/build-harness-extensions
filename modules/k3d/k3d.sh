@@ -28,8 +28,6 @@ K3D_NETWORK=${K3D_NETWORK:-"mintelnet"}
 create() {
   if [ "$(k3d cluster list | grep -o -E "^${K3D_CLUSTER_NAME}")" ]; then
     echo "K3d cluster ${K3D_CLUSTER_NAME} already exists - you may want to cleanup with: make k3d/delete"
-    echo "Ensuring all namespaces in current repo have been created ....."
-    create_namespaces
     exit 0
   fi
 
@@ -74,7 +72,7 @@ create() {
     kubectl rollout status deploy/traefik -n kube-system -w
   fi
 
-  create_namespaces
+  make tanka/create-ns
 }
 
 ## Delete the cluster
@@ -84,16 +82,6 @@ delete() {
   if [ "${K3D_DELETE_DOCKER_REGISTRY}" = 'true' ]; then
     k3d registry rm "k3d-${K3D_DOCKER_REGISTRY_NAME}"
   fi
-}
-
-create_namespaces() {
-  namespaces=$(ack -h --nobreak "namespace: '.*'," lib/*/*.libsonnet | sed -n "s/namespace: '\(.*\)',/\1/ p" | awk '{$1=$1};1' | sort | uniq)
-  set +e
-  while IFS= read -r namespace; do
-    echo "Creating namespace $namespace ....."
-    kubectl create namespace $namespace
-  done <<< "$namespaces"
-  set -e
 }
 
 ## Display usage
