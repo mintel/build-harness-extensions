@@ -47,7 +47,6 @@ create() {
 
   # Skip configuring docker-network if we're running in CI (we don't have accesss to docker).
   if [ -z "${CI}" ]; then
-
     if [ -n "${K3D_NETWORK}" ] ; then
       if [ $(docker network ls --format {{.Name}} | grep -w "${K3D_NETWORK}") ]; then
         cluster_create_args+=("--network" "${K3D_NETWORK}")
