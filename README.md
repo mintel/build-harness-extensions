@@ -42,6 +42,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   jsonnet/rm-golden                   Remove golden files from Jsonnet
   jsonnet/test                        Run Jsonnet tests
   jsonnet/update                      Update packages from jsonnetfile.json with jsonnet-bundler
+  k8s/create-ns			      Creates required namespaces for the repo in the cluster
   kind/create                         Start KinD local cluster
   kind/delete                         Delete KinD local cluster
   kubecfg/validate                    Validate manifests

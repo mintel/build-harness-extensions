@@ -91,7 +91,7 @@ EOF
     docker_registry_start
   fi
 
-  make tanka/create-ns
+  make k8s/create-ns
 }
 
 ## Delete the cluster

@@ -72,7 +72,7 @@ create() {
     kubectl rollout status deploy/traefik -n kube-system -w
   fi
 
-  make tanka/create-ns
+  make k8s/create-ns
 }
 
 ## Delete the cluster
