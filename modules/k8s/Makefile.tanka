@@ -1,6 +1,6 @@
 ## Tanka helpers
 
-.PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate
+.PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/apply/% k8s/tanka/delete/%
 
 ## Format Jsonnet files with tanka
 k8s/tanka/fmt: satoshi/check-deps
@@ -13,3 +13,14 @@ k8s/tanka/fmt-test: satoshi/check-deps
 ## Generate manifests using tanka
 k8s/tanka/generate: satoshi/check-deps
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $(app) $(env)
+
+## Apply rendered manifests of an app to the local cluster
+k8s/tanka/apply/%:
+	@app="$*"; \
+	tk apply environments/$$app/local
+
+## Removes rendered manifests of an app from the local cluster
+k8s/tanka/delete/%:
+	@app="$*"; \
+	tk delete environments/$$app/local
+
