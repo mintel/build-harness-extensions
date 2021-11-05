@@ -7,6 +7,7 @@ jb 0.4.0
 jsonnet 0.17.0
 k3d 5.0.2
 kubectl 1.19.9
+kubeval v0.16.1
 kustomize 4.2.0
 opa 0.33.0
 pluto 5.0.1

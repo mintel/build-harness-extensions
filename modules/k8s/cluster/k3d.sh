@@ -39,6 +39,8 @@ create() {
     --image="${K3D_K8S_IMAGE}"
     --api-port="${K3D_API_SERVER_ADDRESS}:${K3D_API_SERVER_PORT}"
     --timeout="${K3D_WAIT}"
+    --port "80:80@loadbalancer"
+    --port "443:443@loadbalancer"
   )
 
   if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ]; then
@@ -56,11 +58,7 @@ create() {
     fi
   fi
 
-  if [ "${K3D_INSTALL_LB}" = 'false' ]; then
-    cluster_create_args+=("--no-lb")
-    cluster_create_args+=("--k3s-server-arg" "--disable=servicelb")
-    cluster_create_args+=("--k3s-server-arg" "--disable=traefik")
-	fi
+  cluster_create_args+=("--k3s-arg" "--disable=traefik@server:0")
 
   k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
 
@@ -75,6 +73,13 @@ create() {
     kubectl rollout status deploy/traefik -n kube-system -w
   fi
 
+  kubectl create ns traefik
+  helm repo add traefik https://helm.traefik.io/traefik
+  helm install --namespace=traefik traefik traefik/traefik
+
+  helm repo add stakater https://stakater.github.io/stakater-charts
+  helm install stakater/reloader
+
   make k8s/create-ns
 }
 
@@ -85,6 +90,16 @@ delete() {
   if [ "${K3D_DELETE_DOCKER_REGISTRY}" = 'true' ]; then
     k3d registry rm "k3d-${K3D_DOCKER_REGISTRY_NAME}"
   fi
+}
+
+## Start the cluster
+up() {
+  k3d cluster start "${K3D_CLUSTER_NAME}"
+}
+
+## Stop the cluster
+down() {
+  k3d cluster stop "${K3D_CLUSTER_NAME}"
 }
 
 ## Display usage
@@ -102,6 +117,10 @@ fi
 while [ "$1" != "" ]; do
     case $1 in
         create )                create
+                                ;;
+        up )                    up
+                                ;;
+        down )                  down
                                 ;;
         delete )                delete
                                 ;;

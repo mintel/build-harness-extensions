@@ -1,0 +1,15 @@
+## Tanka helpers
+
+.PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate
+
+## Format Jsonnet files with tanka
+k8s/tanka/fmt: satoshi/check-deps
+	tk fmt .
+
+## Test formatting of Jsonnet files and exit with non-zero when changes would be made
+k8s/tanka/fmt-test: satoshi/check-deps
+	tk fmt --test .
+
+## Generate manifests using tanka
+k8s/tanka/generate: satoshi/check-deps
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $(app) $(env)
