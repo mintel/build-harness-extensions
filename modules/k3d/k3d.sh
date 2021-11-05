@@ -45,11 +45,13 @@ create() {
     cluster_create_args+=("--registry-use" "${K3D_PREFIX}-${K3D_DOCKER_REGISTRY_NAME}:${K3D_DOCKER_REGISTRY_PORT}")
 	fi
 
-  if [ -n "${K3D_NETWORK}" ] ; then
-    if [ $(docker network ls --format {{.Name}} | grep -w "${K3D_NETWORK}") ]; then
-      cluster_create_args+=("--network" "${K3D_NETWORK}")
-    else
-      echo "Specified docker network ${K3D_NETWORK} does not exist. Skipping!"
+  if [ -z "${CI}" ]; then
+    if [ -n "${K3D_NETWORK}" ] ; then
+      if [ $(docker network ls --format {{.Name}} | grep -w "${K3D_NETWORK}") ]; then
+        cluster_create_args+=("--network" "${K3D_NETWORK}")
+      else
+        echo "Specified docker network ${K3D_NETWORK} does not exist. Skipping!"
+      fi
     fi
   fi
 
@@ -93,7 +95,7 @@ if [ "$#" = "0" ]; then
   usage
   exit 1
 fi
-    
+
 while [ "$1" != "" ]; do
     case $1 in
         create )                create
