@@ -70,15 +70,13 @@ create() {
   if [ "${K3D_INSTALL_LB}" = 'true' ]; then
     # sleep as this is an addon
     sleep 5
-    kubectl rollout status deploy/traefik -n kube-system -w
+    kubectl create ns traefik
+    helm repo add traefik https://helm.traefik.io/traefik
+    helm install --namespace=traefik traefik traefik/traefik
   fi
 
-  kubectl create ns traefik
-  helm repo add traefik https://helm.traefik.io/traefik
-  helm install --namespace=traefik traefik traefik/traefik
-
   helm repo add stakater https://stakater.github.io/stakater-charts
-  helm install stakater/reloader
+  helm install stakater stakater/reloader
 
   make k8s/create-ns
 }
