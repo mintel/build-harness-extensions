@@ -10,7 +10,7 @@ See https://github.com/cloudposse/build-harness#extending-build-harness-with-tar
 As an example, you could `git-submodule` this into your repo (into the `build-harness-extensions` dir) then use the following:
 
 ```sh
-export HELP_FILTER ?= git/submodules-update|jsonnet|kind|kubecfg|kubeval|opa|tanka
+export HELP_FILTER ?= git/submodules-update|jsonnet|k8s|opa
 -include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
@@ -42,11 +42,24 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   jsonnet/rm-golden                   Remove golden files from Jsonnet
   jsonnet/test                        Run Jsonnet tests
   jsonnet/update                      Update packages from jsonnetfile.json with jsonnet-bundler
+  k3d/create                          Start a k3d local cluster (deprecated -> k8s/cluster/create)
+  k3d/delete                          Delete a k3d local cluster (deprecated -> k8s/cluster/delete)
+  k8s/cluster/create                  Create a local Kubernetes cluster
+  k8s/cluster/delete                  Delete a local Kubernetes cluster
+  k8s/cluster/down                    Stops an existing local Kubernetes cluster
+  k8s/cluster/up                      Starts an existing local Kubernetes cluster
   k8s/create-ns                       Creates required namespaces for the repo in the cluster
-  kind/create                         Start KinD local cluster
-  kind/delete                         Delete KinD local cluster
-  kubecfg/validate                    Validate manifests
-  kubeval/validate                    Validate manifests
+  k8s/kubecfg/validate                Validate manifests
+  k8s/kubeval/validate                Validate manifests
+  k8s/tanka/apply/%                   Apply rendered manifests of an app to the local cluster
+  k8s/tanka/delete/%                  Removes rendered manifests of an app from the local cluster
+  k8s/tanka/fmt                       Format Jsonnet files with tanka
+  k8s/tanka/fmt-test                  Test formatting of Jsonnet files and exit with non-zero when changes would be made
+  k8s/tanka/generate                  Generate manifests using tanka including support for kustomize
+  kind/create                         Start KinD local cluster (deprecated, use k3d)
+  kind/delete                         Delete KinD local cluster (deprecated, use k3d)
+  kubecfg/validate                    Validate manifests (deprecated -> k8s/kubecfg/validate)
+  kubeval/validate                    Validate manifests (deprecated -> k8s/kubeval/validate)
   opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
   satoshi/check-asdf-dep              Check dependencies (installer) for Satoshi
@@ -68,7 +81,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   python/isort                        Fix python imports using isort
   python/isort/check                  Check python imports using isort
   python/mypy/check                   Check python files statically using mypy
-  tanka/fmt                           Format Jsonnet files with tanka
-  tanka/fmt-test                      Test formatting of Jsonnet files and exit with non-zero when changes would be made
-  tanka/generate                      Generate manifests using tanka including support for kustomize
+  tanka/fmt                           Format Jsonnet files with tanka (deprecated -> k8s/tanka/fmt)
+  tanka/fmt-test                      Test formatting of Jsonnet files and exit with non-zero when changes would be made (deprecated -> k8s/tanka/fmt-test)
+  tanka/generate                      Generate manifests using tanka including support for kustomize (deprecated -> k8s/tanka/generate)
 ```
