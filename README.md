@@ -42,8 +42,6 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   jsonnet/rm-golden                   Remove golden files from Jsonnet
   jsonnet/test                        Run Jsonnet tests
   jsonnet/update                      Update packages from jsonnetfile.json with jsonnet-bundler
-  k3d/create                          Start a k3d local cluster (deprecated -> k8s/cluster/create)
-  k3d/delete                          Delete a k3d local cluster (deprecated -> k8s/cluster/delete)
   k8s/cluster/create                  Create a local Kubernetes cluster
   k8s/cluster/delete                  Delete a local Kubernetes cluster
   k8s/cluster/down                    Stops an existing local Kubernetes cluster
@@ -56,10 +54,6 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   k8s/tanka/fmt                       Format Jsonnet files with tanka
   k8s/tanka/fmt-test                  Test formatting of Jsonnet files and exit with non-zero when changes would be made
   k8s/tanka/generate                  Generate manifests using tanka including support for kustomize
-  kind/create                         Start KinD local cluster (deprecated, use k3d)
-  kind/delete                         Delete KinD local cluster (deprecated, use k3d)
-  kubecfg/validate                    Validate manifests (deprecated -> k8s/kubecfg/validate)
-  kubeval/validate                    Validate manifests (deprecated -> k8s/kubeval/validate)
   opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
   satoshi/check-asdf-dep              Check dependencies (installer) for Satoshi
@@ -81,7 +75,4 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   python/isort                        Fix python imports using isort
   python/isort/check                  Check python imports using isort
   python/mypy/check                   Check python files statically using mypy
-  tanka/fmt                           Format Jsonnet files with tanka (deprecated -> k8s/tanka/fmt)
-  tanka/fmt-test                      Test formatting of Jsonnet files and exit with non-zero when changes would be made (deprecated -> k8s/tanka/fmt-test)
-  tanka/generate                      Generate manifests using tanka including support for kustomize (deprecated -> k8s/tanka/generate)
 ```
