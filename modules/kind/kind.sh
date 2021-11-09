@@ -90,6 +90,8 @@ EOF
   if [ "${KIND_INSTALL_DOCKER_REGISTRY}" = '1' ]; then
     docker_registry_start
   fi
+
+  make k8s/create-ns
 }
 
 ## Delete the cluster
