@@ -59,6 +59,7 @@ create() {
   fi
 
   cluster_create_args+=("--k3s-arg" "--disable=traefik@server:0")
+  cluster_create_args+=("--k3s-arg" "--disable-network-policy@server:0")
 
   k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
 
@@ -72,7 +73,7 @@ create() {
     sleep 5
     kubectl create ns traefik
     helm repo add traefik https://helm.traefik.io/traefik
-    helm install --namespace=traefik traefik traefik/traefik
+    helm install --namespace=traefik --set logs.access.enabled=true traefik traefik/traefik
   fi
 
   helm repo add stakater https://stakater.github.io/stakater-charts
