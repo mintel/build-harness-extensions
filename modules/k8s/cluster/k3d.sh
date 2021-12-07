@@ -22,6 +22,7 @@ K3D_WAIT=${K3D_WAIT:-"120s"}
 K3D_API_SERVER_ADDRESS=${K3D_API_SERVER_ADDRESS:-"0.0.0.0"}
 K3D_API_SERVER_PORT=${K3D_API_SERVER_PORT:-6443}
 K3D_NETWORK=${K3D_NETWORK:-"mintelnet"}
+K3D_NODES=${K3D_NODES:-1}
 
 
 ## Create a cluster with the local registry enabled in container
@@ -41,6 +42,7 @@ create() {
     --timeout="${K3D_WAIT}"
     --port "80:80@loadbalancer"
     --port "443:443@loadbalancer"
+    --servers ${K3D_NODES}
   )
 
   if [ "${K3D_INSTALL_DOCKER_REGISTRY}" = 'true' ]; then
@@ -58,8 +60,8 @@ create() {
     fi
   fi
 
-  cluster_create_args+=("--k3s-arg" "--disable=traefik@server:0")
-  cluster_create_args+=("--k3s-arg" "--disable-network-policy@server:0")
+  cluster_create_args+=("--k3s-arg" "--no-deploy=traefik@server:*")
+  cluster_create_args+=("--k3s-arg" "--disable-network-policy@server:*")
 
   k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
 
