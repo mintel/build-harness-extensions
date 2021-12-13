@@ -2,6 +2,10 @@
 
 .PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/apply/% k8s/tanka/delete/%
 
+## Update Helm Chart
+k8s/tanka/update-chart/%:
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/update-helm-chart.sh $*
+
 ## Format Jsonnet files with tanka
 k8s/tanka/fmt: satoshi/check-deps
 	tk fmt .
