@@ -1,7 +1,6 @@
 #!/bin/bash
 
 K3D_CLUSTER_NAME=${K3D_CLUSTER_NAME:-"local"}
-KIND_CLUSTER_NAME=${KIND_CLUSTER_NAME:-"kind"}
 
 if [ "$(k3d cluster list | grep -o -E "^${K3D_CLUSTER_NAME}")" ]; then
   set +e
