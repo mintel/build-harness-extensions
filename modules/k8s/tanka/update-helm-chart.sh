@@ -13,6 +13,6 @@ result=$(helm search repo ${CHART_NAME})
 
 latest_version=`echo $result | sed "s|.*${CHART_NAME} \([0-9\.]*\) .*|\1|"`
 
-sed -i "\|.*${CHART_NAME}.*|,+1 d" chartfile.yaml
+yq -i eval "del(.requires.[] | select(.chart == \"${CHART_NAME}\"))" chartfile.yaml
 
 tk tool charts add $1@$latest_version
