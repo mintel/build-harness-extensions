@@ -6,6 +6,7 @@ NAMESPACE=${NAMESPACE:-""}
 OWNER=${OWNER:-""}
 IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-""}
 IMAGE_TAG=${IMAGE_TAG:-""}
+PORT=${PORT:-""}
 
 echo ""
 
@@ -48,6 +49,12 @@ if [ "${IMAGE_TAG}" = "" ]; then
   IMAGE_TAG=$tag
 fi
 
+if [ "${PORT}" = "" ]; then
+  echo "Main port that the container image exposes, eg: 8080:"
+  read port
+  PORT=$port
+fi
+
 mkdir -p lib/${APP_NAME}
 mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
 
@@ -67,7 +74,7 @@ echo """(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/m
       repository: '${IMAGE_REPOSITORY}',
       tag: '${IMAGE_TAG}',
     },
-    port: 9898,
+    port: ${PORT},
     replicas: 2,
     env: {
     },
