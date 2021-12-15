@@ -1,6 +1,6 @@
 ## Tanka helpers
 
-.PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/apply/% k8s/tanka/delete/%
+.PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/%
 
 ## Update Helm Chart
 k8s/tanka/update-chart/%:
@@ -28,3 +28,6 @@ k8s/tanka/delete/%:
 	@app="$*"; \
 	tk delete environments/$$app/local
 
+## Creates a new app in the existing repo
+k8s/tanka/new-app/%:
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/new-app.sh $*
