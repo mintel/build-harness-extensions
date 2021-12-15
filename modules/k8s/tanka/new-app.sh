@@ -59,7 +59,7 @@ mkdir -p lib/${APP_NAME}
 mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
 
 
-echo """(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/mintel-util/main.libsonnet')
+echo "(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/mintel-util/main.libsonnet')
 {
   _config+:: {
     namespace: '${NAMESPACE}',
@@ -92,7 +92,7 @@ echo """(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/m
 
   app:
     $.util.mintel.helm.wrapper('../../charts/standard-application-stack', $.appValues),
-}""" > lib/${APP_NAME}/base.libsonnet
+}" > lib/${APP_NAME}/base.libsonnet
 
 environments=("local" "aws.dev" "aws.qa" "aws.prod")
 for ENV in "${environments[@]}"
@@ -102,7 +102,7 @@ do
     API_SERVER="\n    apiServer: 'https://0.0.0.0:6443',"
   fi
 
-  echo -e """{
+  echo -e "{
   apiVersion: 'tanka.dev/v1alpha1',
   kind: 'Environment',
   metadata: {
@@ -118,7 +118,7 @@ do
       appValues+:: {
       },
     },
-}""" > environments/${APP_NAME}/${ENV}/main.jsonnet
+}" > environments/${APP_NAME}/${ENV}/main.jsonnet
 done
 
 echo
