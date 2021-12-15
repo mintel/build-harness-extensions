@@ -34,6 +34,7 @@ if [ "${OWNER}" = "" ]; then
   read owner
   OWNER=$owner
 fi
+OWNER=`echo "$OWNER" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr A-Z a-z`
 
 if [ "${IMAGE_REPOSITORY}" = "" ]; then
   echo "Repository of image to deploy, eg: mintel/portal/portal (note: if not a mintel gitlab repo then you will need to update the 'registry' value manually"
@@ -110,5 +111,8 @@ do
       appValues+:: {
       },
     },
-}""" > environments/${APP_NAME}/${ENV}/main.libsonnet
+}""" > environments/${APP_NAME}/${ENV}/main.jsonnet
 done
+
+echo
+echo "Make sure you review and edit the generated ./lib/${APP_NAME}/base.libsonnet file"

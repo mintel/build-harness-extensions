@@ -29,5 +29,5 @@ k8s/tanka/delete/%:
 	tk delete environments/$$app/local
 
 ## Creates a new app in the existing repo
-k8s/tanka/new-app/%:
+k8s/tanka/add/%:
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/new-app.sh $*
