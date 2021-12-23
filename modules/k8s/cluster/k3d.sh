@@ -82,6 +82,8 @@ create() {
   helm install stakater stakater/reloader
 
   make k8s/create-ns
+
+  make k8s/create-imagepull-secret
 }
 
 ## Delete the cluster
