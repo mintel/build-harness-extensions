@@ -81,7 +81,9 @@ create() {
   helm repo add stakater https://stakater.github.io/stakater-charts
   helm install stakater stakater/reloader
 
-  make k8s/create-ns
+  make k8s/local/create-ns
+
+  make k8s/local/create-imagepull-secret
 }
 
 ## Delete the cluster
