@@ -2,14 +2,14 @@
 # DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-tools'
 #
 conftest v0.28.1
-helm 3.7.0
+helm 3.7.2
 jb 0.4.0
-jsonnet 0.17.0
-k3d 5.0.2
-kubectl 1.19.9
+jsonnet 0.18.0
+k3d 5.2.2
+kubectl 1.21.2
 kubeval v0.16.1
-kustomize 4.2.0
-opa 0.33.0
-pluto 5.0.1
+kustomize 4.4.0
+opa 0.35.0
+pluto 5.2.4
 tanka 0.19.0
 yq v4.12.0
