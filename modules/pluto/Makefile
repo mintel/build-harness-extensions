@@ -8,7 +8,7 @@ MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 pluto/validate: satoshi/check-deps
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
-		if ! pluto detect-files -v $(PLUTO_VERBOSITY) --target-versions=k8s=$(PLUTO_K8S_VERSION) -o wide -d $$dir; then \
+		if ! pluto detect-files -v $(PLUTO_VERBOSITY) --target-versions=k8s=$(PLUTO_K8S_VERSION) -o wide -d $$dir --ignore-deprecations; then \
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
