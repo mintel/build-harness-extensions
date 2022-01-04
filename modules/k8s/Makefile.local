@@ -4,11 +4,11 @@
 
 ## Create required namespaces in local cluster
 k8s/local/create-ns:
-	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/create-ns.sh
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/local/create-ns.sh
 
 ## Creates an imagepull secret in repo namespaces based on used ~/.docker/config.json
 k8s/local/create-imagepull-secret:
-	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/create-imagepull-secret.sh
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/local/create-imagepull-secret.sh
 
 ## Create a local Kubernetes cluster
 k8s/local/create:
