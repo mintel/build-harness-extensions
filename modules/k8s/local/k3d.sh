@@ -98,7 +98,7 @@ delete() {
 ## Start the cluster
 up() {
   set +e
-  curl -I -k --insecure https://${K3D_API_SERVER_ADDRESS}:${K3D_API_SERVER_PORT}/livez 2>&1 | grep -i 'unauthorised'
+  curl -I -k --insecure "https://$K3D_API_SERVER_ADDRESS:$K3D_API_SERVER_PORT/livez" 2>&1 | grep -i 'unauthorized' > /dev/null
   if [ $? -eq 0 ]; then
     echo "${K3D_CLUSTER_NAME} cluster already running."
   else
