@@ -11,7 +11,7 @@ set -o errexit
 [ "$TRACE" ] && set -x
 
 K3D_PREFIX="k3d"
-K3D_K8S_IMAGE=${K3D_K8S_IMAGE:-"rancher/k3s:v1.20.11-k3s2"}
+K3D_K8S_IMAGE=${K3D_K8S_IMAGE:-"rancher/k3s:v1.21.8-k3s1"}
 K3D_CLUSTER_NAME=${K3D_CLUSTER_NAME:-"local"}
 K3D_DOCKER_REGISTRY_NAME=${K3D_DOCKER_REGISTRY_NAME:-"default.localhost"}
 K3D_DOCKER_REGISTRY_PORT=${K3D_DOCKER_REGISTRY_PORT:-"5000"}
@@ -60,7 +60,6 @@ create() {
     fi
   fi
 
-  cluster_create_args+=("--k3s-arg" "--no-deploy=traefik@server:*")
   cluster_create_args+=("--k3s-arg" "--disable-network-policy@server:*")
 
   k3d cluster create "${K3D_CLUSTER_NAME}" "${cluster_create_args[@]}"
@@ -69,14 +68,6 @@ create() {
   kubectl rollout status deploy/coredns -n kube-system -w
   kubectl rollout status deploy/metrics-server -n kube-system -w
   kubectl rollout status deploy/local-path-provisioner -n kube-system -w
-
-  if [ "${K3D_INSTALL_LB}" = 'true' ]; then
-    # sleep as this is an addon
-    sleep 5
-    kubectl create ns traefik
-    helm repo add traefik https://helm.traefik.io/traefik
-    helm install --namespace=traefik --set logs.access.enabled=true traefik traefik/traefik
-  fi
 
   helm repo add stakater https://stakater.github.io/stakater-charts
   helm install stakater stakater/reloader
