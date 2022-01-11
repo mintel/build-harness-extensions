@@ -1,22 +1,28 @@
 #
 # DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-tools'
 #
-conftest v0.28.1
-helm 3.7.2
-jb 0.4.0
-k3d 5.2.2
-kubectl 1.21.2
-kubeval v0.16.1
-kustomize 4.4.0
-opa 0.35.0
-pluto 5.2.4
-tanka 0.19.0
-yq v4.12.0
 
-# The default go-jsonnet plugin requires Go to be installed because it compiles
-# the binary from scratch. If you would prefer not to install Go, there is an
-# alternative plugin that downloads a pre-built binary from GitHub:
-#
-# $ asdf plugin remove go-jsonnet
-# $ asdf plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
+#asdf:plugin add conftest
+conftest v0.28.1
+#asdf:plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
 go-jsonnet 0.18.0
+#asdf:plugin add helm
+helm 3.7.2
+#asdf:plugin add jb
+jb 0.4.0
+#asdf:plugin add k3d
+k3d 5.2.2
+#asdf:plugin add kubectl
+kubectl 1.21.2
+#asdf:plugin add kubeval
+kubeval v0.16.1
+#asdf:plugin add kustomize
+kustomize 4.4.0
+#asdf:plugin add opa
+opa 0.35.0
+#asdf:plugin add pluto
+pluto 5.2.4
+#asdf:plugin add tanka
+tanka 0.19.0
+#asdf:plugin add yq
+yq v4.12.0
