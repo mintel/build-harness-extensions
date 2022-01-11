@@ -1,15 +1,28 @@
 #
 # DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-tools'
 #
+
+#asdf:plugin add conftest
 conftest v0.28.1
+#asdf:plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
+go-jsonnet 0.18.0
+#asdf:plugin add helm
 helm 3.7.2
+#asdf:plugin add jb
 jb 0.4.0
-jsonnet 0.18.0
+#asdf:plugin add k3d
 k3d 5.2.2
+#asdf:plugin add kubectl
 kubectl 1.21.2
+#asdf:plugin add kubeval
 kubeval v0.16.1
+#asdf:plugin add kustomize
 kustomize 4.4.0
+#asdf:plugin add opa
 opa 0.35.0
+#asdf:plugin add pluto
 pluto 5.2.4
+#asdf:plugin add tanka
 tanka 0.19.0
+#asdf:plugin add yq
 yq v4.12.0
