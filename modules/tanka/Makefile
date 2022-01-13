@@ -12,5 +12,5 @@ tanka/fmt-test: satoshi/check-deps
 	make k8s/tanka/fmt-test
 
 ## Generate manifests using tanka
-tanka/generate: satoshi/check-deps
+tanka/generate: satoshi/check-deps jsonnet/install
 	make k8s/tanka/generate
