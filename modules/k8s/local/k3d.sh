@@ -75,6 +75,8 @@ create() {
   make k8s/local/create-ns
 
   make k8s/local/create-imagepull-secret
+
+  make k8s/local/create-priority-classes
 }
 
 ## Delete the cluster

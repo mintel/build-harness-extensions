@@ -1,6 +1,6 @@
 # Local Kubernetes Cluster Helpers
 
-.PHONY: k8s/local/create-ns k8s/local/create-imagepull-secret k8s/local/create k8s/local/delete k8s/local/up k8s/local/down
+.PHONY: k8s/local/create-ns k8s/local/create-imagepull-secret k8s/local/create-priority-classes k8s/local/create k8s/local/delete k8s/local/up k8s/local/down
 
 ## Create required namespaces in local cluster
 k8s/local/create-ns:
@@ -9,6 +9,10 @@ k8s/local/create-ns:
 ## Creates an imagepull secret in repo namespaces based on used ~/.docker/config.json
 k8s/local/create-imagepull-secret:
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/local/create-imagepull-secret.sh
+
+## Creates necessary priority classes required by some deployments
+k8s/local/create-priority-classes:
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/local/create-priority-classes.sh
 
 ## Create a local Kubernetes cluster
 k8s/local/create:

@@ -1,0 +1,33 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: default
+value: 200000
+globalDefault: true
+description: "Global default"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: infra
+value: 800000
+globalDefault: false
+description: "Used for core-infra workloads"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: app-high-priority
+value: 700000
+globalDefault: false
+description: "Used for high-priority applications"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: app-low-priority
+value: 100000
+globalDefault: false
+description: "Used for low-priority applications"
+
