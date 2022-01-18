@@ -4,7 +4,7 @@ CHART_NAME="$1"
 
 helm repo list | grep -i mintel > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  helm repo add mintel https://mintel.gihub.io/helm-charts > /dev/null 2>&1
+  helm repo add mintel https://mintel.github.io/helm-charts > /dev/null 2>&1
 fi
 
 helm repo update > /dev/null 2>&1
