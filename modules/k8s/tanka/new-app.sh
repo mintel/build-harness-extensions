@@ -92,7 +92,7 @@ echo "(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/min
 
   app:
     $.util.mintel.helm.wrapper('../../charts/standard-application-stack', $.appValues),
-}" > lib/${APP_NAME}/base.libsonnet
+}" > lib/${APP_NAME}/main.libsonnet
 
 environments=("local" "aws.dev" "aws.qa" "aws.prod")
 for ENV in "${environments[@]}"
