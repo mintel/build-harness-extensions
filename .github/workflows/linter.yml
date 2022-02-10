@@ -12,7 +12,6 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review # Change reporter.
           path: "." # Optional.
-          pattern: "*.sh" # Optional.
           exclude: "./.git/*" # Optional.
-          check_all_files_with_shebangs: "false" # Optional.
+          check_all_files_with_shebangs: "true" # Optional.
 
