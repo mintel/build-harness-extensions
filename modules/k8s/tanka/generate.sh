@@ -38,7 +38,7 @@ if [ "$ENV" != "local" ]; then
   dirs=$(echo "$dirs" | grep -v local)
 fi
 for env_path in $dirs; do
-  cluster_envs=$(tk env list --names | grep "$env_path")
+  cluster_envs=$(tk env list --names 2>/dev/null | grep "$env_path")
   for cluster_env in $cluster_envs; do
     echo "Generating $cluster_env"
     mkdir -p "./rendered/$cluster_env"
