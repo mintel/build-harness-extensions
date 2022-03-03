@@ -107,6 +107,10 @@ do
   kind: 'Environment',
   metadata: {
     name: 'environments/${APP_NAME}/${ENV}',
+    labels: {
+      app: '${APP_NAME}',
+      env: '${ENV}',
+    },
   },
   spec: {
     namespace: $.data._config.namespace,${API_SERVER}
