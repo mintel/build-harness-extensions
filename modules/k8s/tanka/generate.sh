@@ -29,6 +29,16 @@ join_arr() {
   echo "$*"
 }
 
+find_jsonnet() {
+	local env_path; env_path=$1
+	if ! find "$env_path" -name '*.jsonnet' >/dev/null 2>&1; then
+		env_path=$(dirname "$env_path")
+		find_jsonnet "$env_path"
+	else
+		echo "$env_path"
+	fi
+}
+
 echo
 echo "Generating rendered manifests in ./rendered"
 echo "Run 'make jsonnet/[install|update]' beforehand if you require vendor package installation"
@@ -37,15 +47,16 @@ echo
 mkdir -p "$(pwd)/rendered/"
 touch "$(pwd)/rendered/.gitkeep"
 
-for env_path in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
-	echo "Generating $env_path"
-	mkdir -p "./rendered/$env_path"
-	touch "./rendered/$env_path/kustomization.yaml"
-	yq -i eval 'del(.resources)' "./rendered/$env_path/kustomization.yaml"
-	rm -f "./rendered/$env_path/manifests/"*.yaml
-	rm -f "./rendered/$env_path/manifests/manifest.json"
-	tk export "./rendered/$env_path/manifests" "$TANKA_REPO_DIR/$env_path" --format="$TANKA_EXPORT_FMT" --name="$env_path" > /dev/null
-	pushd "./rendered/$env_path" > /dev/null || exit 1
+for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
+	echo "Generating $env_name"
+	mkdir -p "./rendered/$env_name"
+	touch "./rendered/$env_name/kustomization.yaml"
+	yq -i eval 'del(.resources)' "./rendered/$env_name/kustomization.yaml"
+	rm -f "./rendered/$env_name/manifests/"*.yaml
+	rm -f "./rendered/$env_name/manifests/manifest.json"
+	env_path=$(find_jsonnet "$TANKA_REPO_DIR/$env_name")
+	tk export "./rendered/$env_name/manifests" "$env_path" --format="$TANKA_EXPORT_FMT" --name="$env_name" > /dev/null
+	pushd "./rendered/$env_name" > /dev/null || exit 1
 	kustomize edit add resource ./manifests/*.yaml
 	popd > /dev/null || exit 1
 	echo
