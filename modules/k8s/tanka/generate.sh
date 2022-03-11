@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -e -o pipefail
 
 LC_COLLATE=C
 
@@ -36,6 +36,15 @@ echo
 
 mkdir -p "$(pwd)/rendered/"
 touch "$(pwd)/rendered/.gitkeep"
+
+# CPT-805: If tk env list fails, print stderr and exit but filter any TRACE messages; these will appear anyway during
+# the tk export so we don't need them here and they produce quite a lot of spam. This means that we can send stderr to
+# /dev/null below without losing any of the error messages we need when debugging.
+err=$(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>&1 | grep -v TRACE) && rc=$? || rc=$?
+if [[ $rc != 0 ]]; then
+	echo "$err"
+	exit $rc
+fi
 
 for env_path in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
 	echo "Generating $env_path"
