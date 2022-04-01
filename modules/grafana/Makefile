@@ -19,24 +19,6 @@ grafana/develop: grafana/cleanup grafana/setup-local-grafana-mintel grafana/setu
 # Start up a local grafana instance with no datasources configured, and sync to dashboards on your local disk
 grafana/develop-oss: grafana/cleanup grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
 
-grafana/private:
-	@git clone git@gitlab.com:mintel/satoshi/tools/build-harness-extensions-private.git -b ${BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH} ${TMP_GITLAB_REPO_DIRECTORY}
-
-grafana/setup-local-grafana-mintel: grafana/private
-	@. ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/datasource_credentials.sh && \
-	docker run --rm -d -p 3000:3000 -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
-
-grafana/setup-local-grafana-oss:
-	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
-
-grafana/setup-grafana-syncer:
-# Give the grafana instance time to start up before changing the admin password in order to avoid errors
-	@echo "Starting grafana on localhost:3000 ..."
-	@sleep 3s
-	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
-	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
-	@$(MAKE) grafana/cleanup
-
 .PHONY: grafana/cleanup
 # Kill any docker containers associated with grafana/develop, and remove anything added to /tmp
 grafana/cleanup:
@@ -47,3 +29,30 @@ grafana/cleanup:
 	@echo "Removing ${TMP_GITLAB_REPO_DIRECTORY}..."
 	@rm -rf ${TMP_GITLAB_REPO_DIRECTORY}
 	@echo "Cleanup successful."
+
+.PHONY: grafana/aws-profile-check
+grafana/aws-profile-check:
+	@[ "${AWS_PROFILE}" ] || ( echo ">> ERROR: AWS_PROFILE is not set. Please login with \"aws sso\" and set this variable, or try \"make grafana/develop-oss\" to edit dashboards with no datasources defined."; exit 1 )
+	@echo "AWS_PROFILE=${AWS_PROFILE}"
+
+.PHONY: grafana/private
+grafana/private:
+	@git clone git@gitlab.com:mintel/satoshi/tools/build-harness-extensions-private.git -b ${BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH} ${TMP_GITLAB_REPO_DIRECTORY}
+
+.PHONY: grafana/setup-local-grafana-mintel
+grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/private
+	@. ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/datasource_credentials.sh && \
+	docker run --rm -d -p 3000:3000 -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
+
+.PHONY: grafana/setup-local-grafana-oss
+grafana/setup-local-grafana-oss:
+	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
+
+.PHONY: grafana/setup-grafana-syncer
+grafana/setup-grafana-syncer:
+# Give the grafana instance time to start up before changing the admin password in order to avoid errors
+	@echo "Starting grafana on localhost:3000 ..."
+	@sleep 3s
+	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
+	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
+	@$(MAKE) grafana/cleanup
