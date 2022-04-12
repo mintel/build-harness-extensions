@@ -15,7 +15,7 @@ jb 0.4.0
 #asdf:plugin add k3d
 k3d 5.2.2
 #asdf:plugin add kubectl
-kubectl 1.21.2
+kubectl 1.22.8
 #asdf:plugin add kubeval
 kubeval v0.16.1
 #asdf:plugin add kustomize
