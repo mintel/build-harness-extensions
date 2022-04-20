@@ -24,7 +24,11 @@ endif
 satoshi/update-makefile:
 	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/makefile.template")
 
-## Update Satoshi asdf .tool-versions
+## Update Satoshi asdf .tool-versions for k8s toolset
 satoshi/update-tools:
-	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/tool-versions")
+	@make satoshi/update-tools/k8s
+
+## Update Satoshi asdf .tool-versions for a particular toolset e.g. k8s and tf
+satoshi/update-tools/%:
+	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-tool-versions")
 	@make asdf/install
