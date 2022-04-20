@@ -20,9 +20,13 @@ satoshi/check-asdf-dep:
 	$(if $(shell command -v asdf 2> /dev/null),,$(error $(S_RED)[satoshi/check-asdf-dep] Please install `asdf` (https://github.com/asdf-vm/asdf)$(S_RST)))
 endif
 
-## Update Satoshi Makefile
+## Update Satoshi Makefile for k8s toolset
 satoshi/update-makefile:
-	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/makefile.template")
+	@make satoshi/update-makefile/k8s
+
+## Update Satoshi Makefile for a particular toolset e.g. k8s and tf
+satoshi/update-makefile/%:
+	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-makefile.template")
 
 ## Update Satoshi asdf .tool-versions for k8s toolset
 satoshi/update-tools:
