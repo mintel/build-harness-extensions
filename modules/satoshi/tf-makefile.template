@@ -25,5 +25,5 @@ install:
 ## Clean .terraform directory
 .PHONY: clean
 clean:
-    make terraform/clean
-    exit 0
+	make terraform/clean
+	exit 0
