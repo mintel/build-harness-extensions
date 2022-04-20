@@ -14,4 +14,3 @@ jobs:
           path: "." # Optional.
           exclude: "./.git/*" # Optional.
           check_all_files_with_shebangs: "true" # Optional.
-

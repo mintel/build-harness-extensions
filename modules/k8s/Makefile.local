@@ -25,4 +25,3 @@ k8s/local/down:
 ## Delete a local Kubernetes cluster
 k8s/local/delete:
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/local/k3d.sh delete
-

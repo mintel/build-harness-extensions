@@ -61,8 +61,10 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   opa/conftest                        Validate manifests
   satoshi/check-asdf-dep              Check dependencies (installer) for Satoshi
   satoshi/check-deps                  Check dependencies for Satoshi
-  satoshi/update-makefile             Update Satoshi Makefile
-  satoshi/update-tools                Update Satoshi asdf .tool-versions
+  satoshi/update-makefile             Update Satoshi Makefile for k8s toolset
+  satoshi/update-makefile/%           Update Satoshi Makefile for a particular toolset e.g. k8s and tf
+  satoshi/update-tools                Update Satoshi asdf .tool-versions for k8s related repo
+  satoshi/update-tools/%              Update Satoshi asdf .tool-versions for a particular toolset e.g. k8s and tf
   pluto/validate                      Validate manifests
   poetry/check                        Validate the structure of pyproject.toml
   poetry/install                      Install Poetry dependencies
