@@ -25,4 +25,5 @@ install:
 ## Clean .terraform directory
 .PHONY: clean
 clean:
-	find . -type d -name '.terraform' -print0 | xargs -0 rm -rf
+    make terraform/clean
+    exit 0
