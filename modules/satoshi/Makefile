@@ -26,7 +26,7 @@ satoshi/update-makefile:
 
 ## Update Satoshi Makefile for a particular toolset e.g. k8s and tf
 satoshi/update-makefile/%:
-	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-makefile.template")
+	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/CPT-833-Terraform-Module-tools/modules/satoshi/${*}-makefile.template")
 
 ## Update Satoshi asdf .tool-versions for k8s toolset
 satoshi/update-tools:
