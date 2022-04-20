@@ -65,7 +65,6 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   satoshi/update-makefile/%           Update Satoshi Makefile for a particular toolset e.g. k8s and tf
   satoshi/update-tools                Update Satoshi asdf .tool-versions for k8s related repo
   satoshi/update-tools/%              Update Satoshi asdf .tool-versions for a particular toolset e.g. k8s and tf
-  terraform/clean                     Remove .terraform dir to clear modules and providers
   pluto/validate                      Validate manifests
   poetry/check                        Validate the structure of pyproject.toml
   poetry/install                      Install Poetry dependencies

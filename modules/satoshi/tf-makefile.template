@@ -21,9 +21,3 @@ bootstrap:
 install:
 	make asdf/install
 	exit 0
-
-## Clean .terraform directory
-.PHONY: clean
-clean:
-	make terraform/clean
-	exit 0
