@@ -11,7 +11,7 @@ As an example, you could `git-submodule` this into your repo (into the `build-ha
 
 ```sh
 export HELP_FILTER ?= git/submodules-update|jsonnet|k8s|opa
--include $(shell curl -sSL -o .build-harness "https://raw.githubusercontent.com/cloudposse/build-harness/HEAD/templates/Makefile.build-harness"; echo .build-harness)
+-include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
 ```
