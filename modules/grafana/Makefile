@@ -12,15 +12,15 @@ CONTAINER_DASHBOARD_DIRECTORY = /app/dashboards
 TMP_GITLAB_REPO_DIRECTORY = /tmp/build-harness-extensions-private
 
 .PHONY: grafana/develop
-# Start up a local grafana instance with live datasources, and sync to dashboards on your local disk. Only for mintel internal access, try grafana/develop-oss for general use.
+## Develop grafana dashboards using live datasources. Mintel internal use only.
 grafana/develop: grafana/cleanup grafana/setup-local-grafana-mintel grafana/setup-grafana-syncer
 
 .PHONY: grafana/develop-oss
-# Start up a local grafana instance with no datasources configured, and sync to dashboards on your local disk
+## Develop grafana dashboards without setting up datasources.
 grafana/develop-oss: grafana/cleanup grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
 
 .PHONY: grafana/cleanup
-# Kill any docker containers associated with grafana/develop, and remove anything added to /tmp
+## Cleanup docker containers and files associated with grafana/develop
 grafana/cleanup:
 	@echo "Killing ${GRAFANA_LOCAL_DOCKER_NAME}..."
 	@docker kill ${GRAFANA_LOCAL_DOCKER_NAME} || true
