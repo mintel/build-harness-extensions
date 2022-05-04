@@ -55,11 +55,13 @@ if [ "${PORT}" = "" ]; then
   PORT=$port
 fi
 
+# shellcheck disable=SC2086
 mkdir -p lib/${APP_NAME}
+# shellcheck disable=SC2086
 mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
 
 
-echo "(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/mintel-util/main.libsonnet')
+echo "local utils = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
 {
   _config+:: {
     namespace: '${NAMESPACE}',
@@ -91,7 +93,7 @@ echo "(import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/min
   },
 
   app:
-    $.util.mintel.helm.wrapper('../../charts/standard-application-stack', $.appValues),
+    utils.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
 }" > lib/${APP_NAME}/base.libsonnet
 
 environments=("local" "aws.dev" "aws.qa" "aws.prod")
