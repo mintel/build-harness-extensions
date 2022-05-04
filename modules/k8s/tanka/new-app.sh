@@ -55,6 +55,7 @@ if [ "${PORT}" = "" ]; then
   PORT=$port
 fi
 
+# shellcheck disable=SC2086
 mkdir -p lib/${APP_NAME}
 # shellcheck disable=SC2086
 mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
