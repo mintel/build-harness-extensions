@@ -2,6 +2,7 @@
 GRAFANA_ADMIN_PASSWORD ?= admin
 LOCAL_DASHBOARD_DIRECTORY ?= $(shell ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/local_dashboard_directory_prompt.sh)
 BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH ?= main
+CREATE_GRAFANA_INSTANCE ?= true
 
 # Generally no reason to change these defaults, but values don't matter as long as they're different from eachother
 GRAFANA_LOCAL_DOCKER_NAME = grafana_local
@@ -11,15 +12,19 @@ GRAFANA_SYNC_DOCKER_NAME = grafana_sync
 CONTAINER_DASHBOARD_DIRECTORY = /app/dashboards
 TMP_GITLAB_REPO_DIRECTORY = /tmp/build-harness-extensions-private
 
-.PHONY: grafana/develop
+.PHONY: grafana/develop grafana/develop-oss grafana/cleanup grafana/aws-profile-check grafana/private grafana/setup-local-grafana-mintel grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
+
+ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 ## Develop grafana dashboards using live datasources. Mintel internal use only.
 grafana/develop: grafana/cleanup grafana/setup-local-grafana-mintel grafana/setup-grafana-syncer
-
-.PHONY: grafana/develop-oss
 ## Develop grafana dashboards without setting up datasources.
 grafana/develop-oss: grafana/cleanup grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
+else
+## Set the CREATE_GRAFANA_INSTANCE variable to false if you already have a localhost:3000 grafana instance and just want to run the syncer
+grafana/develop: grafana/setup-grafana-syncer
+grafana/develop-oss: grafana/setup-grafana-syncer
+endif
 
-.PHONY: grafana/cleanup
 ## Cleanup docker containers and files associated with grafana/develop
 grafana/cleanup:
 	@echo "Killing ${GRAFANA_LOCAL_DOCKER_NAME}..."
@@ -30,29 +35,29 @@ grafana/cleanup:
 	@rm -rf ${TMP_GITLAB_REPO_DIRECTORY}
 	@echo "Cleanup successful."
 
-.PHONY: grafana/aws-profile-check
 grafana/aws-profile-check:
-	@[ "${AWS_PROFILE}" ] || ( echo ">> ERROR: AWS_PROFILE is not set. Please login with \"aws sso\" and set this variable, or try \"make grafana/develop-oss\" to edit dashboards with no datasources defined."; exit 1 )
+	@[ "${AWS_PROFILE}" ] || ( echo ">> ERROR: AWS_PROFILE is not set. Please login with \"aws sso login --profile <name>\" and set this variable, or try \"make grafana/develop-oss\" to edit dashboards with no datasources defined."; exit 1 )
 	@echo "AWS_PROFILE=${AWS_PROFILE}"
 
-.PHONY: grafana/private
 grafana/private:
 	@git clone git@gitlab.com:mintel/satoshi/tools/build-harness-extensions-private.git -b ${BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH} ${TMP_GITLAB_REPO_DIRECTORY}
 
-.PHONY: grafana/setup-local-grafana-mintel
 grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/private
+	@docker pull grafana/grafana:latest
 	@. ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/datasource_credentials.sh && \
 	docker run --rm -d -p 3000:3000 -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
 
-.PHONY: grafana/setup-local-grafana-oss
 grafana/setup-local-grafana-oss:
+	@docker pull grafana/grafana:latest
 	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
 
-.PHONY: grafana/setup-grafana-syncer
 grafana/setup-grafana-syncer:
+ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 # Give the grafana instance time to start up before changing the admin password in order to avoid errors
 	@echo "Starting grafana on localhost:3000 ..."
 	@sleep 3s
 	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
+endif
+	@docker pull mintel/grafana-local-sync:latest
 	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
 	@$(MAKE) grafana/cleanup
