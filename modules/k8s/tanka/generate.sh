@@ -20,7 +20,7 @@ if [ "$ENV" != "local" ]; then
 	SELECTOR+=( "env!=local" )
 fi
 
-TANKA_EXPORT_FMT="{{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace}}{{.metadata.namespace }}-{{end}}{{.metadata.name }}"
+TANKA_EXPORT_FMT='{{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace}}{{.metadata.namespace }}-{{end}}{{ if index .metadata.annotations "app.mintel.com/altManifestFileSuffix" }}{{ index .metadata.annotations "app.mintel.com/altManifestFileSuffix" }}{{ else }}{{.metadata.name }}{{ end }}'
 TANKA_REPO_DIR=$(pwd)
 
 join_arr() {
