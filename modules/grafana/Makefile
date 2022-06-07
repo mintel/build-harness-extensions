@@ -3,6 +3,7 @@ GRAFANA_ADMIN_PASSWORD ?= admin
 LOCAL_DASHBOARD_DIRECTORY ?= $(shell ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/local_dashboard_directory_prompt.sh)
 BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH ?= main
 CREATE_GRAFANA_INSTANCE ?= true
+GRAFANA_IMAGE ?= grafana/grafana:8.4.2
 
 # Generally no reason to change these defaults, but values don't matter as long as they're different from eachother
 GRAFANA_LOCAL_DOCKER_NAME = grafana_local
@@ -43,13 +44,13 @@ grafana/private:
 	@git clone git@gitlab.com:mintel/satoshi/tools/build-harness-extensions-private.git -b ${BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH} ${TMP_GITLAB_REPO_DIRECTORY}
 
 grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/private
-	@docker pull grafana/grafana:latest
+	@docker pull $(GRAFANA_IMAGE)
 	@. ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/datasource_credentials.sh && \
-	docker run --rm -d -p 3000:3000 -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
+	docker run --rm -d -p 3000:3000 -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
 
 grafana/setup-local-grafana-oss:
-	@docker pull grafana/grafana:latest
-	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} grafana/grafana:latest
+	@docker pull $(GRAFANA_IMAGE)
+	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
 
 grafana/setup-grafana-syncer:
 ifeq (${CREATE_GRAFANA_INSTANCE}, true)
