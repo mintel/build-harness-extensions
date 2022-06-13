@@ -22,11 +22,11 @@ k8s/tanka/fmt-test: satoshi/check-deps
 	tk fmt --test .
 
 ## Generate manifests using tanka
-k8s/tanka/generate: satoshi/check-deps
+k8s/tanka/generate: satoshi/check-deps jsonnet/install
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $(GENERATE_ARGS)
 
 ## Generate manifests of specific app using tanka
-k8s/tanka/generate/%: satoshi/check-deps
+k8s/tanka/generate/%: satoshi/check-deps jsonnet/install
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $*
 
 ## Apply rendered manifests of an app to the local cluster
