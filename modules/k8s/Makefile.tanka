@@ -1,12 +1,5 @@
 ## Tanka helpers
 
-ifdef app
-GENERATE_ARGS+=--app $(app)
-endif
-ifdef env
-GENERATE_ARGS+=--env $(env)
-endif
-
 .PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/%
 
 ## Update Helm Chart
@@ -23,7 +16,7 @@ k8s/tanka/fmt-test: satoshi/check-deps
 
 ## Generate manifests using tanka
 k8s/tanka/generate: satoshi/check-deps jsonnet/install
-	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $(GENERATE_ARGS)
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $(app) $(env)
 
 ## Generate manifests of specific app using tanka
 k8s/tanka/generate/%: satoshi/check-deps jsonnet/install

@@ -4,38 +4,8 @@ set -e -o pipefail
 
 LC_COLLATE=C
 
-PARAMS=""
-while (( "$#" )); do
-  case "$1" in
-    -a|--app)
-      if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-        APP=$2
-        shift 2
-      else
-        echo "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
-    -e|--env)
-      if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-        ENV=$2
-        shift 2
-      else
-        echo "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
-    -*)
-      echo "Error: Unsupported flag $1" >&2
-      exit 1
-      ;;
-    *)
-      PARAMS="$PARAMS $1"
-      shift
-      ;;
-  esac
-done
-eval set -- "$PARAMS"
+APP="$1"
+ENV="$2"
 
 SELECTOR=()
 if [ -n "$APP" ]; then
