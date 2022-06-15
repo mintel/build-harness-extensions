@@ -10,7 +10,7 @@ PORT=${PORT:-""}
 
 echo ""
 
-if [ -z ${APP_NAME} ]; then
+if [ -z "${APP_NAME}" ]; then
   echo "Must specify an application name"
   exit 1
 fi
@@ -25,33 +25,33 @@ if [ "${NAMESPACE}" = "" ]; then
     NAMESPACE="${namespaces[0]}"
   else
     echo "Namespace:"
-    read ns
+    read -r ns
     NAMESPACE=$ns
   fi
 fi
 
 if [ "${OWNER}" = "" ]; then
   echo "Owner:"
-  read owner
+  read -r owner
   OWNER=$owner
 fi
-OWNER=`echo "$OWNER" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr A-Z a-z`
+OWNER=$(echo "$OWNER" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr '[:upper:]' '[:lower:]')
 
 if [ "${IMAGE_REPOSITORY}" = "" ]; then
   echo "Repository of image to deploy, eg: mintel/portal/portal (note: if not a mintel gitlab repo then you will need to update the 'registry' value manually"
-  read repository
+  read -r repository
   IMAGE_REPOSITORY=$repository
 fi
 
 if [ "${IMAGE_TAG}" = "" ]; then
   echo "Tag of the image to deploy:"
-  read tag
+  read -r tag
   IMAGE_TAG=$tag
 fi
 
 if [ "${PORT}" = "" ]; then
   echo "Main port that the container image exposes, eg: 8080:"
-  read port
+  read -r port
   PORT=$port
 fi
 
@@ -61,7 +61,7 @@ mkdir -p lib/${APP_NAME}
 mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
 
 
-echo "local utils = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
+echo "local m = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
 {
   _config+:: {
     namespace: '${NAMESPACE}',
@@ -93,8 +93,8 @@ echo "local utils = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/lib
   },
 
   app:
-    utils.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
-}" > lib/${APP_NAME}/base.libsonnet
+    m.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
+}" > "lib/${APP_NAME}/base.libsonnet"
 
 environments=("local" "aws.dev" "aws.qa" "aws.prod")
 for ENV in "${environments[@]}"
@@ -124,7 +124,7 @@ do
       appValues+:: {
       },
     },
-}" > environments/${APP_NAME}/${ENV}/main.jsonnet
+}" > "environments/${APP_NAME}/${ENV}/main.jsonnet"
 done
 
 echo
