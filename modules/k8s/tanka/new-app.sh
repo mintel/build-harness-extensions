@@ -61,7 +61,7 @@ mkdir -p lib/${APP_NAME}
 mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
 
 
-echo "local utils = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
+echo "local m = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
 {
   _config+:: {
     namespace: '${NAMESPACE}',
@@ -93,8 +93,8 @@ echo "local utils = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/lib
   },
 
   app:
-    utils.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
-}" > lib/${APP_NAME}/base.libsonnet
+    m.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
+}" > "lib/${APP_NAME}/base.libsonnet"
 
 environments=("local" "aws.dev" "aws.qa" "aws.prod")
 for ENV in "${environments[@]}"
