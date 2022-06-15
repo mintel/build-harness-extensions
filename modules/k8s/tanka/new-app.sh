@@ -35,7 +35,7 @@ if [ "${OWNER}" = "" ]; then
   read -r owner
   OWNER=$owner
 fi
-OWNER=`echo "$OWNER" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr A-Z a-z`
+OWNER=$(echo "$OWNER" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr '[:upper:]' '[:lower:]')
 
 if [ "${IMAGE_REPOSITORY}" = "" ]; then
   echo "Repository of image to deploy, eg: mintel/portal/portal (note: if not a mintel gitlab repo then you will need to update the 'registry' value manually"
