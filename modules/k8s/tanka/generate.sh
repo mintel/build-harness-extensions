@@ -39,11 +39,11 @@ eval set -- "$PARAMS"
 
 SELECTOR=()
 if [ -n "$APP" ]; then
-	SELECTOR+=( "app=$APP" )
+	SELECTOR+=( "app in ($APP)" )
 fi
 
 if [ -n "$ENV" ]; then
-	SELECTOR+=( "env=$ENV" )
+	SELECTOR+=( "env in ($ENV)" )
 fi
 
 if [ "$ENV" != "local" ]; then
