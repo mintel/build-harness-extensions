@@ -39,18 +39,21 @@ eval set -- "$PARAMS"
 
 SELECTOR=()
 if [ -n "$APP" ]; then
-	SELECTOR+=( "app=$APP" )
+	SELECTOR+=( "app in ($APP)" )
 fi
 
 if [ -n "$ENV" ]; then
-	SELECTOR+=( "env=$ENV" )
+	SELECTOR+=( "env in ($ENV)" )
 fi
 
 if [ "$ENV" != "local" ]; then
 	SELECTOR+=( "env!=local" )
 fi
 
-TANKA_EXPORT_FMT='{{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace }}{{ .metadata.namespace }}-{{end}}{{ if hasKey .metadata.annotations "app.mintel.com/altManifestFileSuffix" }}{{ get .metadata.annotations "app.mintel.com/altManifestFileSuffix" }}{{ else }}{{ .metadata.name }}{{ end }}'
+# Tanka uses a Bell character as a placeholder in for a path separator.
+# We can use a "replace" to hack it into the environment name.
+# See: https://github.com/grafana/tanka/blob/v0.22.1/pkg/tanka/export.go#L23
+TANKA_EXPORT_FMT='{{ env.metadata.name | replace "/" "\x07" }}/manifests/{{.apiVersion}}.{{.kind}}-{{ if.metadata.namespace }}{{ .metadata.namespace }}-{{end}}{{ if hasKey .metadata.annotations "app.mintel.com/altManifestFileSuffix" }}{{ get .metadata.annotations "app.mintel.com/altManifestFileSuffix" }}{{ else }}{{ .metadata.name }}{{ end }}'
 TANKA_REPO_DIR=$(pwd)
 
 join_arr() {
@@ -87,16 +90,17 @@ if [[ $rc != 0 ]]; then
 fi
 
 for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
-	echo "Generating $env_name"
-	mkdir -p "./rendered/$env_name"
-	touch "./rendered/$env_name/kustomization.yaml"
-	yq -i eval 'del(.resources)' "./rendered/$env_name/kustomization.yaml"
-	rm -f "./rendered/$env_name/manifests/"*.yaml
-	rm -f "./rendered/$env_name/manifests/manifest.json"
-	env_path=$(find_jsonnet "$TANKA_REPO_DIR/$env_name")
-	tk export "./rendered/$env_name/manifests" "$env_path" --format="$TANKA_EXPORT_FMT" --name="$env_name" > /dev/null
-	pushd "./rendered/$env_name" > /dev/null || exit 1
+	mkdir -p "$TANKA_REPO_DIR/rendered/$env_name"
+	touch "$TANKA_REPO_DIR/rendered/$env_name/kustomization.yaml"
+	yq -i eval 'del(.resources)' "$TANKA_REPO_DIR/rendered/$env_name/kustomization.yaml"
+	rm -f "$TANKA_REPO_DIR/rendered/$env_name/manifests/"*.yaml
+done
+
+tk export "$TANKA_REPO_DIR/rendered/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge
+find "$TANKA_REPO_DIR/rendered" -name "manifest.json" -delete
+
+for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
+	pushd "$TANKA_REPO_DIR/rendered/$env_name" > /dev/null || exit 1
 	kustomize edit add resource ./manifests/*.yaml
 	popd > /dev/null || exit 1
-	echo
 done
