@@ -7,6 +7,7 @@ updater/test: check-prereq-variables
 	@chmod +x bin/argocd-image-updater-tester
 	@bin/argocd-image-updater-tester
 	@rm bin/argocd-image-updater-tester
+	@rm -d bin
 
 check-prereq-variables:
 	@[ "${GITLAB_SECRET}" ] || ( echo -e "ERROR: GITLAB_SECRET environment variable is not defined. Set the variable before running.\nexport GITLAB_SECRET=\"<gitlab_username>:<gitlab_token>\"\nhttps://argocd-image-updater.readthedocs.io/en/stable/basics/authentication/#using-an-environment-variable"; exit 1 )
