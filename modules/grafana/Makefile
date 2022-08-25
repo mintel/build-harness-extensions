@@ -46,8 +46,7 @@ grafana/private:
 grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/private
 	@docker pull $(GRAFANA_IMAGE)
 	@. ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/datasource_credentials.sh && \
-	docker run --rm -d -p 3000:3000 -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin -e GF_AUTH_ANONYMOUS_ENABLED=true --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
-
+	docker run --rm -d -p 3000:3000 --user $(id):$(id) -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning -v ${HOME}/.aws:/usr/share/grafana/.aws --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin -e GF_AUTH_ANONYMOUS_ENABLED=true -e AWS_SDK_LOAD_CONFIG=true -e AWS_EC2_METADATA_DISABLED=1 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
 grafana/setup-local-grafana-oss:
 	@docker pull $(GRAFANA_IMAGE)
 	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
