@@ -9,6 +9,16 @@ endif
 
 .PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/%
 
+## Vendor charts
+k8s/tanka/vendor/charts:
+ifdef ALWAYS_VENDOR_CHARTS
+	IFS=',' read -ra ADDR <<< "${ALWAYS_VENDOR_CHARTS}"; \
+	for i in "$${ADDR[@]}"; do \
+  	rm -rf "charts/$$i"; \
+	done
+endif
+	tk tool charts vendor
+
 ## Update Helm Chart
 k8s/tanka/update-chart/%:
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/update-helm-chart.sh $*
@@ -22,11 +32,11 @@ k8s/tanka/fmt-test: satoshi/check-deps
 	tk fmt --test .
 
 ## Generate manifests using tanka
-k8s/tanka/generate: satoshi/check-deps jsonnet/install
+k8s/tanka/generate: satoshi/check-deps jsonnet/install k8s/tanka/vendor/charts
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh $(GENERATE_ARGS)
 
 ## Generate manifests of specific app using tanka
-k8s/tanka/generate/%: satoshi/check-deps jsonnet/install
+k8s/tanka/generate/%: satoshi/check-deps jsonnet/install k8s/tanka/vendor/charts
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/generate.sh --app $*
 
 ## Apply rendered manifests of an app to the local cluster
