@@ -12,12 +12,12 @@ endif
 ## Vendor charts
 k8s/tanka/vendor/charts:
 ifdef ALWAYS_VENDOR_CHARTS
-	IFS=',' read -ra ADDR <<< "${ALWAYS_VENDOR_CHARTS}"; \
+	@IFS=',' read -ra ADDR <<< "${ALWAYS_VENDOR_CHARTS}"; \
 	for i in "$${ADDR[@]}"; do \
   	rm -rf "charts/$$i"; \
 	done
 endif
-	tk tool charts vendor
+	@tk tool charts vendor
 
 ## Update Helm Chart
 k8s/tanka/update-chart/%:
