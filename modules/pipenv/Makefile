@@ -5,6 +5,19 @@ PY_VENV = $(shell $(PY_PIPENV) --venv 2> /dev/null)
 PIPENV_RUN ?= $(PY_PIPENV) run
 PIPENV ?= $(PY_PIPENV)
 
-ifneq ($(USE_PIPENV),)
-	PYTHON := ${PIPENV_RUN}
+# Get the directory where the Pipfile is.
+PIPENV_PIPFILE_DIR := $(shell $(PIPENV) --where 2> /dev/null)
+
+ifneq ($(PIPENV_OVERRIDE_PYTHON),)
+	PYTHON := ${PIPENV_RUN} python
 endif
+
+## Test that pipenv is in PATH.
+pipenv/py: python/check
+	$(call assert-set,PY_PIPENV)
+	@echo "Found pipenv: $(PY_PIPENV)"
+
+## Lock dependencies
+pipenv/lock:
+	$(call assert-set,PIPENV_PIPFILE_DIR)
+	@$(PIPENV) lock

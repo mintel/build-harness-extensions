@@ -1,7 +1,7 @@
 ## python black helpers
-PY_BLACK = $(shell which black 2>/dev/null)
 
-BLACK ?= $(PY_BLACK)
+# Run as python module so it supports virtual environment managers
+BLACK ?= $(PYTHON) -m black
 
 ## Check python files using black
 python/black/check:

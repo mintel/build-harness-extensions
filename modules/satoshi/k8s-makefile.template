@@ -1,8 +1,8 @@
 #
 # DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile'
 #
-export HELP_FILTER ?= asdf|jsonnet|k3d|kubecfg|kubeval|opa|pluto|satoshi|tanka
--include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
+export HELP_FILTER ?= asdf|grafana|jsonnet|k8s|opa|pluto|satoshi|updater
+-include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
 

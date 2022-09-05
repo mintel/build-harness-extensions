@@ -1,0 +1,17 @@
+#
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-tools'.
+#
+# If you are adding any apps to the master file in build-harness-extensions remember to add an install function to the
+# terraform cloud agent (https://github.com/mintel/tfc-agent/blob/main/install-binaries.sh) too.
+#
+
+#asdf:plugin add terraform
+terraform 1.0.7
+#asdf:plugin add tflint
+tflint 0.34.1
+#asdf:plugin add terraform-docs
+terraform-docs 0.14.1
+#asdf:plugin add awscli
+awscli 2.2.43
+#asdf:plugin add tfsec
+tfsec 1.15.4
