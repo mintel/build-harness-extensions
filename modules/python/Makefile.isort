@@ -1,7 +1,7 @@
 ## python isort helpers
-PY_ISORT = $(shell which isort 2>/dev/null)
 
-ISORT ?= $(PY_ISORT)
+# Run as python module so it supports virtual environment managers
+ISORT ?= $(PYTHON) -m isort
 ISORT_FLAGS ?= --profile black
 # Use black profile
 
@@ -12,4 +12,4 @@ python/isort/check:
 
 ## Fix python imports using isort
 python/isort:
-	$(ISORT) $(ISORT_FLAGS) $(PYTHON_LINT_TARGETS)
+	@$(ISORT) $(ISORT_FLAGS) $(PYTHON_LINT_TARGETS)

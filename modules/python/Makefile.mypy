@@ -1,5 +1,8 @@
 ## mypy helpers
 
+# Run as python module so it supports virtual environment managers
+MYPY ?= $(PYTHON) -m mypy
+
 ## Check python files statically using mypy
 python/mypy/check: python/lint/announce/mypy
-	@$(PYTHON) mypy
+	@$(MYPY)

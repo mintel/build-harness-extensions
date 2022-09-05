@@ -1,7 +1,7 @@
 ## python flake8 helpers
-PY_FLAKE8 = $(shell which flake8 2>/dev/null)
 
-FLAKE8 ?= $(PY_FLAKE8)
+# Run as python module so it supports virtual environment managers
+FLAKE8 ?= $(PYTHON) -m flake8
 
 FLAKE8_OUTPUT ?= reports/python.flake8
 FLAKE8_FLAGS ?= --select=B,C,E,F,W,T4,B9 --ignore=E203,E231,E266,E501,W503 --output-file=$(FLAKE8_OUTPUT) --tee --exit-zero

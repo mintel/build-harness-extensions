@@ -1,7 +1,7 @@
 ## python autoflake helpers
-PY_AUTOFLAKE = $(shell which autoflake 2>/dev/null)
 
-AUTOFLAKE ?= $(PY_AUTOFLAKE)
+# Run as python module so it supports virtual environment managers
+AUTOFLAKE ?= $(PYTHON) -m autoflake
 AUTOFLAKE_OUTPUT ?= reports/python.autoflake
 AUTOFLAKE_FLAGS ?= --remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports
 

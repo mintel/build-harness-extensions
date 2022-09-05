@@ -1,9 +1,15 @@
 ## pytest helpers
-PYTEST ?= $(PYTHON) pytest
+
+# Run as python module so it supports virtual environment managers
+PYTEST ?= $(PYTHON) -m pytest
 
 ## Run Python tests with pytest
 pytest:
 	$(PYTEST)
+
+pytest/check:
+	$(call assert-set,PYTEST)
+	@echo "Found pytest: $(PYTEST)"
 
 pytest/lf:
 	$(PYTEST) --lf
