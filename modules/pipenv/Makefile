@@ -5,9 +5,6 @@ PY_VENV = $(shell $(PY_PIPENV) --venv 2> /dev/null)
 PIPENV_RUN ?= $(PY_PIPENV) run
 PIPENV ?= $(PY_PIPENV)
 
-# Get the directory where the Pipfile is.
-PIPENV_PIPFILE_DIR := $(shell $(PIPENV) --where 2> /dev/null)
-
 ifneq ($(PIPENV_OVERRIDE_PYTHON),)
 	PYTHON := ${PIPENV_RUN} python
 endif
@@ -19,5 +16,5 @@ pipenv/py: python/check
 
 ## Lock dependencies
 pipenv/lock:
-	$(call assert-set,PIPENV_PIPFILE_DIR)
+	$(call assert-set,$(shell $(PIPENV) --where 2> /dev/null))
 	@$(PIPENV) lock
