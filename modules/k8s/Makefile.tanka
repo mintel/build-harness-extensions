@@ -11,13 +11,15 @@ endif
 
 ## Vendor charts
 k8s/tanka/vendor/charts:
+ifneq ("$(wildcard ./chartfile.yaml)", "")
 ifdef ALWAYS_VENDOR_CHARTS
 	@IFS=',' read -ra ADDR <<< "${ALWAYS_VENDOR_CHARTS}"; \
 	for i in "$${ADDR[@]}"; do \
-  	rm -rf "charts/$$i"; \
+	rm -rf "charts/$$i"; \
 	done
 endif
 	@tk tool charts vendor
+endif
 
 ## Update Helm Chart
 k8s/tanka/update-chart/%:
