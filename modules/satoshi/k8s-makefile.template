@@ -6,11 +6,9 @@ export HELP_FILTER ?= asdf|grafana|jsonnet|k8s|opa|pluto|satoshi|updater
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
 
-
 ## Init build-harness and build-harness-extensions
 .PHONY: bootstrap
 bootstrap:
-	git init
 	make init
 	if [ ! -d "./build-harness-extensions" ]; then git submodule add https://github.com/mintel/build-harness-extensions.git build-harness-extensions ; fi
 	git submodule update --init --recursive
@@ -19,6 +17,10 @@ bootstrap:
 ## Install tools and initial jsonnet-deps
 .PHONY: install
 install:
-	make asdf/install
+	@if [ ! -f .tool-versions ]; then \
+		make satoshi/update-tools/k8s; \
+	else \
+		make asdf/install; \
+	fi
 	make jsonnet/install
 	exit 0
