@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 APP_NAME=$1
 
 NAMESPACE=${NAMESPACE:-""}
