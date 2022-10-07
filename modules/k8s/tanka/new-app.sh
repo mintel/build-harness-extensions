@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 APP_NAME=$1
 
 NAMESPACE=${NAMESPACE:-""}
@@ -20,14 +22,9 @@ if [ -d "lib/${APP_NAME}" ] || [ -d "environments/${APP_NAME}" ]; then
 fi
 
 if [ "${NAMESPACE}" = "" ]; then
-  namespaces=$(tk env list --json | jq -r '.[].spec.namespace' | sort | uniq)
-  if [ ${#namespaces[@]} == 1 ]; then
-    NAMESPACE="${namespaces[0]}"
-  else
-    echo "Namespace:"
-    read -r ns
-    NAMESPACE=$ns
-  fi
+  echo "Namespace:"
+  read -r ns
+  NAMESPACE=$ns
 fi
 
 if [ "${OWNER}" = "" ]; then
