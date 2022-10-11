@@ -20,8 +20,24 @@ if [ -d "lib/${APP_NAME}" ] || [ -d "environments/${APP_NAME}" ]; then
 fi
 
 if [ "${NAMESPACE}" = "" ]; then
-  echo "Namespace:"
-  read -r ns
+  environments=$(tk env list --json)
+  if [ "$environments" != null ]; then
+    mapfile -t namespaces <<< "$(echo "$environments" | jq -r '.[].spec.namespace' | sort | uniq | grep -v default)"
+  fi
+  namespaces+=("(new)")
+  PS3="Choose a namespace: "
+  select ns in "${namespaces[@]}"; do
+    case $ns in 
+      "(new)")
+        echo -n "Enter new namespace: "
+        read -r ns
+        break
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
   NAMESPACE=$ns
 fi
 
