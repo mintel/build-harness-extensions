@@ -69,6 +69,7 @@ create() {
   kubectl rollout status deploy/metrics-server -n kube-system -w
   kubectl rollout status deploy/local-path-provisioner -n kube-system -w
 
+  sleep 5000
   kubectl config get-contexts
   echo $KUBECONFIG
   helm repo add stakater https://stakater.github.io/stakater-charts
