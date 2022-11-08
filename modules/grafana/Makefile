@@ -55,7 +55,7 @@ grafana/setup-grafana-syncer:
 ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 # Give the grafana instance time to start up before changing the admin password in order to avoid errors
 	@echo "Starting grafana on localhost:3000 ..."
-	@sleep 3s
+	@sleep 3
 	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
 endif
 	@docker pull mintel/grafana-local-sync:latest
