@@ -76,7 +76,10 @@ create() {
   fi
   make k8s/local/create-ns
 
-  make k8s/local/create-imagepull-secret
+  if [ -z "${CI}" ]; then
+    # Not required in CI and does not have a local docker config.json to mount
+    make k8s/local/create-imagepull-secret
+  fi
 }
 
 ## Delete the cluster
