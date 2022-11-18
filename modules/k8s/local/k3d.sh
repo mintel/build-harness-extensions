@@ -69,12 +69,17 @@ create() {
   kubectl rollout status deploy/metrics-server -n kube-system -w
   kubectl rollout status deploy/local-path-provisioner -n kube-system -w
 
-  helm repo add stakater https://stakater.github.io/stakater-charts
-  helm install stakater stakater/reloader
-
+  if [ -z "${CI}" ]; then
+    # Not required in CI
+    helm repo add stakater https://stakater.github.io/stakater-charts
+    helm install stakater stakater/reloader --namespace default
+  fi
   make k8s/local/create-ns
 
-  make k8s/local/create-imagepull-secret
+  if [ -z "${CI}" ]; then
+    # Not required in CI and does not have a local docker config.json to mount
+    make k8s/local/create-imagepull-secret
+  fi
 }
 
 ## Delete the cluster
