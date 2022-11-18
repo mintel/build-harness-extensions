@@ -69,10 +69,11 @@ create() {
   kubectl rollout status deploy/metrics-server -n kube-system -w
   kubectl rollout status deploy/local-path-provisioner -n kube-system -w
 
-  sleep 50000
-  helm repo add stakater https://stakater.github.io/stakater-charts
-  helm install stakater stakater/reloader
-
+  if [ -z "${CI}" ]; then
+    # Not required in CI
+    helm repo add stakater https://stakater.github.io/stakater-charts
+    helm install stakater stakater/reloader --namespace default
+  fi
   make k8s/local/create-ns
 
   make k8s/local/create-imagepull-secret
