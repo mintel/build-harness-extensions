@@ -89,6 +89,7 @@ if [[ $rc != 0 ]]; then
 	exit $rc
 fi
 
+# Delete the manifests for each environment as these will be re-generated
 for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
 	mkdir -p "$TANKA_REPO_DIR/rendered/$env_name"
 	touch "$TANKA_REPO_DIR/rendered/$env_name/kustomization.yaml"
@@ -96,11 +97,25 @@ for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[
 	rm -f "$TANKA_REPO_DIR/rendered/$env_name/manifests/"*.yaml
 done
 
+# Export rendered manifests for each environment
 tk export "$TANKA_REPO_DIR/rendered/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge
 find "$TANKA_REPO_DIR/rendered" -name "manifest.json" -delete
 
+# Re-populate the kustomization file
 for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
 	pushd "$TANKA_REPO_DIR/rendered/$env_name" > /dev/null || exit 1
 	kustomize edit add resource ./manifests/*.yaml
 	popd > /dev/null || exit 1
+done
+
+# Handle case where environment itself is deleted.
+# We need to clean up any rendered environments that no longer exist
+# as the deleted env wouldn't have shown up in `tk env list ...`
+rendered_envs=$(find rendered/environments -type d | cut -d/ -f2,3 | sort | uniq  | grep -v "environments$")
+for env_path in $rendered_envs; do
+  if [[ ! -d "$env_path" ]];
+  then
+    echo "Found rendered directory '$env_path' without an environment. Deleting."
+   rm -rf "./rendered/$env_path"
+  fi
 done
