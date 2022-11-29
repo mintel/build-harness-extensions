@@ -108,16 +108,16 @@ for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[
 	popd > /dev/null || exit 1
 done
 
-# Handle case where environment itself is deleted.
-# We need to clean up any rendered environments that no longer exist as the deleted env wouldn't have shown up in
-# `tk env list ...`
-# This snippet finds all environments under the `./rendered` directory and checks if the associated  path exists
-# under `./environments`. If it does not find a match, it deletes the rendered directory.
-rendered_envs=$(find rendered/environments -type d | cut -d/ -f2,3 | sort | uniq  | grep -v "environments$")
-for env_path in $rendered_envs; do
-  if [[ ! -d "$env_path" ]];
-  then
-    echo "Found rendered directory '$env_path' without an environment. Deleting."
-   rm -rf "./rendered/$env_path"
+# Handle case where environment is deleted
+#
+# Find all the rendered environments (ignore local since we should not render this anyway)
+rendered_envs=$(find rendered/environments -type d -not -path "*/local" | cut -d/ -f2,3,4 | sort | uniq  | grep -v "environments$")
+# Get a list of known tanka environments
+envs=$(tk env list --names)
+# Check that the rendered environment is known - if not, delete it
+for rendered_env in $rendered_envs; do
+  if ! echo "$envs" | grep -q "$rendered_env"; then
+    echo "Found rendered directory ${rendered_env} without an associated environment (deleting)"
+    rm -rf "./rendered/${rendered_env}"
   fi
 done
