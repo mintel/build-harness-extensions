@@ -12,6 +12,6 @@ tflint 0.34.1
 #asdf:plugin add terraform-docs
 terraform-docs 0.14.1
 #asdf:plugin add awscli
-awscli 2.2.43
+awscli 2.9.15
 #asdf:plugin add tfsec
 tfsec 1.15.4
