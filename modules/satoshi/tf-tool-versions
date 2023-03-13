@@ -7,8 +7,8 @@ terraform 1.0.7
 #asdf:plugin add tflint
 tflint 0.34.1
 #asdf:plugin add terraform-docs
-terraform-docs 0.14.1
+terraform-docs 0.16.0
 #asdf:plugin add awscli
-awscli 2.9.15
+awscli 2.11.2
 #asdf:plugin add tfsec
 tfsec 1.15.4
