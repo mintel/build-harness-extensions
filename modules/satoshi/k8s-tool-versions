@@ -5,15 +5,15 @@
 #asdf:plugin add amtool https://gitlab.com/gitlab-com/gl-infra/asdf-promtool.git
 amtool 0.25.0
 #asdf:plugin add conftest
-conftest v0.28.1
+conftest v0.39.2
 #asdf:plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
-go-jsonnet 0.18.0
+go-jsonnet 0.19.1
 #asdf:plugin add helm
-helm 3.7.2
+helm 3.11.2
 #asdf:plugin add helm-docs
-helm-docs 1.7.0
+helm-docs 1.11.0
 #asdf:plugin add jb
-jb 0.4.0
+jb 0.5.1
 #asdf:plugin add k3d
 k3d 5.2.2
 #asdf:plugin add kubectl
@@ -21,12 +21,14 @@ kubectl 1.22.8
 #asdf:plugin add kubeval
 kubeval v0.16.1
 #asdf:plugin add kustomize
-kustomize 4.4.0
+kustomize 4.5.7
 #asdf:plugin add opa
-opa 0.35.0
+opa 0.50.0
 #asdf:plugin add pluto
-pluto 5.2.4
+pluto 5.15.1
 #asdf:plugin add tanka
-tanka 0.22.1
+tanka 0.24.0
+#asdf:plugin add yamllint
+yamllint 1.29.0
 #asdf:plugin add yq
-yq 4.12.0
+yq 4.31.2
