@@ -28,5 +28,7 @@ opa 0.50.0
 pluto 5.15.1
 #asdf:plugin add tanka
 tanka 0.24.0
+#asdf:plugin add yamllint
+yamllint 1.29.0
 #asdf:plugin add yq
 yq 4.31.2
