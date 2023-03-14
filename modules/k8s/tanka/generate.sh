@@ -98,7 +98,7 @@ for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[
 done
 
 # Export rendered manifests for each environment
-tk export "$TANKA_REPO_DIR/rendered/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge
+tk export "$TANKA_REPO_DIR/rendered/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts
 find "$TANKA_REPO_DIR/rendered" -name "manifest.json" -delete
 
 # Re-populate the kustomization file
