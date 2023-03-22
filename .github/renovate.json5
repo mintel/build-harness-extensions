@@ -1,0 +1,44 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:base",
+    "helpers:pinGitHubActionDigests",
+  ],
+  labels: ["dependencies"],
+  asdf: {
+    fileMatch: [
+      ".*tool-versions$",
+    ],
+  },
+  regexManagers: [
+    {
+      description: "Update tools in asdf-vm tool-versions",
+      fileMatch: [
+        ".*tool-versions$",
+      ],
+      matchStrings: [
+        "#\\s*renovate:( datasource=(?<datasource>.*?))? depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( depType=(?<depType>.*?))?\\n[^\\s]+\\s+(?<currentValue>.*)",
+      ],
+      datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
+      versioningTemplate: "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
+    },
+  ],
+  packageRules: [
+    {
+      description: "Auto-merge non-major updates",
+      matchUpdateTypes: ["minor", "patch", "digest", "lockFileMaintenance"],
+      automerge: true,
+    },
+    {
+      description: "Only allow patch updates for some dependencies",
+      matchPackageNames: ["terraform", "kubernetes/kubernetes"],
+      matchUpdateTypes: ["major", "minor"],
+      enabled: false
+    },
+    {
+      description: "Update the Renovate GitHub action",
+      packageNames: "renovatebot/github-action",
+      extends: [":semanticCommitType(fix)", "schedule:weekly"],
+    },
+  ],
+}
