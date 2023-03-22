@@ -14,7 +14,7 @@ tflint 0.34.1
 terraform-docs 0.16.0
 
 #asdf:plugin add awscli
-awscli 2.11.2
+awscli 2.11.5
 
 #asdf:plugin add tfsec
 #renovate: depName=aquasecurity/tfsec
