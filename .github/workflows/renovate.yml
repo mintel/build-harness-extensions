@@ -11,13 +11,13 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3
       # - name: Setup node
       #   uses: actions/setup-node@v3
       #   with:
       #     node-version: 16
       - name: Renovate
-        uses: renovatebot/github-action@v36.0.1
+        uses: renovatebot/github-action@2529763aa12e6d5b445bc911e8bd8cce2a4f205c # v36.0.1
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
           configurationFile: .github/renovate-config.js
