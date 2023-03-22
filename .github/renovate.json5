@@ -5,6 +5,7 @@
     "helpers:pinGitHubActionDigests",
   ],
   labels: ["dependencies"],
+  prHourlyLimit: 100,
   asdf: {
     fileMatch: [
       ".*tool-versions$",
