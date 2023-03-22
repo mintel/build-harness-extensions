@@ -4,11 +4,18 @@
 
 #asdf:plugin add terraform
 terraform 1.0.7
+
 #asdf:plugin add tflint
+#renovate: depName=terraform-linters/tflint
 tflint 0.34.1
+
 #asdf:plugin add terraform-docs
+#renovate: depName=terraform-docs/terraform-docs
 terraform-docs 0.16.0
+
 #asdf:plugin add awscli
 awscli 2.11.2
+
 #asdf:plugin add tfsec
+#renovate: depName=aquasecurity/tfsec
 tfsec 1.15.4

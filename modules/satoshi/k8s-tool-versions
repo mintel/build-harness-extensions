@@ -4,31 +4,58 @@
 
 #asdf:plugin add amtool https://gitlab.com/gitlab-com/gl-infra/asdf-promtool.git
 amtool 0.25.0
+
 #asdf:plugin add conftest
+#renovate: depName=open-policy-agent/conftest
 conftest v0.39.2
+
 #asdf:plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
+#renovate: depName=google/go-jsonnet
 go-jsonnet 0.19.1
+
 #asdf:plugin add helm
+#renovate: depName=helm/helm
 helm 3.11.2
+
 #asdf:plugin add helm-docs
+#renovate: depName=norwoodj/helm-docs
 helm-docs 1.11.0
+
 #asdf:plugin add jb
+#renovate: depName=jsonnet-bundler/jsonnet-bundler
 jb 0.5.1
+
 #asdf:plugin add k3d
+#renovate: depName=k3d-io/k3d
 k3d 5.2.2
+
 #asdf:plugin add kubectl
+#renovate: depName=kubernetes/kubernetes
 kubectl 1.22.8
+
 #asdf:plugin add kubeval
+#renovate: depName=instrumenta/kubeval
 kubeval v0.16.1
+
 #asdf:plugin add kustomize
 kustomize 4.5.7
+
 #asdf:plugin add opa
+#renovate: depName=open-policy-agent/opa
 opa 0.50.0
+
 #asdf:plugin add pluto
+#renovate: depName=FairwindsOps/pluto
 pluto 5.15.1
+
 #asdf:plugin add tanka
+#renovate: depName=grafana/tanka
 tanka 0.24.0
+
 #asdf:plugin add yamllint
+#renovate: depName=adrienverge/yamllint
 yamllint 1.29.0
+
 #asdf:plugin add yq
+#renovate: depName=mikefarah/yq
 yq 4.31.2
