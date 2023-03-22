@@ -5,7 +5,7 @@ jobs:
     name: runner / shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
