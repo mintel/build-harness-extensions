@@ -46,7 +46,7 @@ opa 0.50.0
 
 #asdf:plugin add pluto
 #renovate: depName=FairwindsOps/pluto
-pluto v5.16.0
+pluto 5.16.0
 
 #asdf:plugin add tanka
 #renovate: depName=grafana/tanka
