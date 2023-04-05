@@ -1,8 +1,8 @@
-S_RED := $(shell tput -Txterm setaf 1)
-S_GRN := $(shell tput -Txterm setaf 2)
-S_YLW := $(shell tput -Txterm setaf 3)
-S_RST := $(shell tput -Txterm sgr0)
-S_BLD := $(shell tput bold)
+S_RED := $(shell tput setaf 1 2> /dev/null || true)
+S_GRN := $(shell tput setaf 2 2> /dev/null || true)
+S_YLW := $(shell tput setaf 3 2> /dev/null || true)
+S_RST := $(shell tput sgr0 2> /dev/null || true)
+S_BLD := $(shell tput bold 2> /dev/null || true)
 
 REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq
 
