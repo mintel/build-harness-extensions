@@ -25,7 +25,7 @@ satoshi/update-makefile:
 	@make satoshi/update-makefile/k8s
 
 ## Update Satoshi Makefile for a particular toolset e.g. k8s and tf
-satoshi/update-makefile/%:
+satoshi/update-makefile/%: FORCE
 	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-makefile.template")
 
 ## Update Satoshi asdf .tool-versions for k8s toolset
@@ -33,6 +33,8 @@ satoshi/update-tools:
 	@make satoshi/update-tools/k8s
 
 ## Update Satoshi asdf .tool-versions for a particular toolset e.g. k8s and tf
-satoshi/update-tools/%:
+satoshi/update-tools/%: FORCE
 	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-tool-versions")
 	@make asdf/install
+
+FORCE:
