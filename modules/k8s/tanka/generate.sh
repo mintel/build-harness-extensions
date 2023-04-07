@@ -9,7 +9,7 @@ while (( "$#" )); do
   case "$1" in
     -a|--app)
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-        APP=$2
+        TANKA_LABEL_APP=$2
         shift 2
       else
         echo "Error: Argument for $1 is missing" >&2
@@ -18,7 +18,7 @@ while (( "$#" )); do
       ;;
     -e|--env)
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-        ENV=$2
+        TANKA_LABEL_ENV=$2
         shift 2
       else
         echo "Error: Argument for $1 is missing" >&2
@@ -38,15 +38,15 @@ done
 eval set -- "$PARAMS"
 
 SELECTOR=()
-if [ -n "$APP" ]; then
-	SELECTOR+=( "app in ($APP)" )
+if [ -n "$TANKA_LABEL_APP" ]; then
+	SELECTOR+=( "app in (${TANKA_LABEL_APP})" )
 fi
 
-if [ -n "$ENV" ]; then
-	SELECTOR+=( "env in ($ENV)" )
+if [ -n "$TANKA_LABEL_ENV" ]; then
+	SELECTOR+=( "env in (${TANKA_LABEL_ENV})" )
 fi
 
-if [ "$ENV" != "local" ]; then
+if [ "$TANKA_LABEL_ENV" != "local" ]; then
 	SELECTOR+=( "env!=local" )
 fi
 
@@ -86,7 +86,7 @@ touch "$(pwd)/rendered/.gitkeep"
 err=$(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>&1 | grep -v TRACE) && rc=$? || rc=$?
 if [[ $rc != 0 ]]; then
 	echo "$err"
-	exit $rc
+	exit "$rc"
 fi
 
 # Delete the manifests for each environment as these will be re-generated
