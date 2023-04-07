@@ -86,7 +86,7 @@ touch "$(pwd)/rendered/.gitkeep"
 err=$(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>&1 | grep -v TRACE) && rc=$? || rc=$?
 if [[ $rc != 0 ]]; then
 	echo "$err"
-	exit $rc
+	exit "$rc"
 fi
 
 # Delete the manifests for each environment as these will be re-generated
