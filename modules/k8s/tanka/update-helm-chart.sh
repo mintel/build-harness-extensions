@@ -1,18 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-CHART_NAME="$1"
+CHART="$1"
 
-helm repo list | grep -i mintel > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  helm repo add mintel https://mintel.github.io/helm-charts > /dev/null 2>&1
-fi
+for s in $(yq eval '.repositories[] | [.name, .url] | join(",")' chartfile.yaml); do
+  repo_name="$(cut -d, -f1 <<< "$s")"
+  repo_url="$(cut -d, -f2- <<< "$s")"
+  helm repo add "$repo_name" "$repo_url" > /dev/null 2>&1
+done
 
 helm repo update > /dev/null 2>&1
 
-result=$(helm search repo ${CHART_NAME})
+latest_version="$(helm search repo "$CHART" --output yaml | yq eval ".[] | select(.name == \"$CHART\").version" -)"
 
-latest_version=`echo $result | sed "s|.*${CHART_NAME} \([0-9\.]*\) .*|\1|"`
+yq eval -i "(.requires[] | select(.chart == \"$CHART\")).version = \"$latest_version\"" chartfile.yaml
 
-yq -i eval "del(.requires.[] | select(.chart == \"${CHART_NAME}\"))" chartfile.yaml
-
-tk tool charts add $1@$latest_version
+tk tool charts vendor
