@@ -72,11 +72,6 @@ find_jsonnet() {
 	fi
 }
 
-echo
-echo "Generating rendered manifests in ./rendered"
-echo "Run 'make jsonnet/[install|update]' beforehand if you require vendor package installation"
-echo
-
 mkdir -p "$(pwd)/rendered/"
 touch "$(pwd)/rendered/.gitkeep"
 
@@ -89,24 +84,36 @@ if [[ $rc != 0 ]]; then
 	exit "$rc"
 fi
 
-# Delete the manifests for each environment as these will be re-generated
-for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
-	mkdir -p "$TANKA_REPO_DIR/rendered/$env_name"
-	touch "$TANKA_REPO_DIR/rendered/$env_name/kustomization.yaml"
-	yq -i eval 'del(.resources)' "$TANKA_REPO_DIR/rendered/$env_name/kustomization.yaml"
-	rm -f "$TANKA_REPO_DIR/rendered/$env_name/manifests/"*.yaml
-done
+# Export rendered manifests for each environment into a tmp dir
+TMP_RENDERED="$(mktemp -d)"
+echo "Rendering manifests to $TMP_RENDERED..."
+tk export "$TMP_RENDERED/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts
+function finish {
+  rm -rf "$TMP_RENDERED"
+}
+trap finish EXIT
+find "$TMP_RENDERED" -name "manifest.json" -delete
 
-# Export rendered manifests for each environment
-tk export "$TANKA_REPO_DIR/rendered/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts
-find "$TANKA_REPO_DIR/rendered" -name "manifest.json" -delete
-
-# Re-populate the kustomization file
-for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
-	pushd "$TANKA_REPO_DIR/rendered/$env_name" > /dev/null || exit 1
+# Move the rendered manifests from the tmpdir to the rendered/ directory.
+echo "Moving rendered manifests to rendered/ dir..."
+swap_manifests() {
+  # Create a skelton of the manifests directory
+  mkdir -p "$TANKA_REPO_DIR/rendered/$1"
+	touch "$TANKA_REPO_DIR/rendered/$1/kustomization.yaml"
+  # Remove the old manifests from the kustomization.yaml files
+  yq eval --inplace 'del(.resources)' "$TANKA_REPO_DIR/rendered/$1/kustomization.yaml"
+  # Swap old manifests for new
+	rm -rf "$TANKA_REPO_DIR/rendered/$1/manifests"
+  mv "$TMP_RENDERED/$1/manifests" "$TANKA_REPO_DIR/rendered/$1/manifests"
+  # (Re-)populate the kustomization file
+  pushd "$TANKA_REPO_DIR/rendered/$1" > /dev/null || exit 1
 	kustomize edit add resource ./manifests/*.yaml
 	popd > /dev/null || exit 1
+}
+for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
+  swap_manifests "$env_name" &
 done
+wait
 
 # Handle case where environment is deleted
 #
