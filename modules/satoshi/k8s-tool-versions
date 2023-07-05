@@ -40,6 +40,10 @@ kubeval v0.16.1
 #asdf:plugin add kustomize
 kustomize 5.0.1
 
+#asdf:plugin add kyverno-cli https://github.com/hobaen/asdf-kyverno-cli.git
+#renovate: depName=kyverno/kyverno
+kyverno-cli 1.10.0
+
 #asdf:plugin add opa
 #renovate: depName=open-policy-agent/opa
 opa 0.50.0
