@@ -44,7 +44,8 @@ k8s/tanka/generate/%: satoshi/check-deps jsonnet/install k8s/tanka/vendor/charts
 ## Apply rendered manifests of an app to the local cluster
 k8s/tanka/apply/%: satoshi/check-deps
 	@app="$*"; \
-	tk apply environments/$$app/local
+	tk apply environments/$$app/local --target 'CustomResourceDefinition/.*' --apply-strategy server --force || true; \
+	tk apply environments/$$app/local --apply-strategy server --force
 
 ## Removes rendered manifests of an app from the local cluster
 k8s/tanka/delete/%: satoshi/check-deps
