@@ -7,6 +7,8 @@ ifdef env
 GENERATE_ARGS+=--env $(env)
 endif
 
+TK_APPLY_FLAGS ?= --apply-strategy=server --force
+
 .PHONY: k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/%
 
 ## Vendor charts
@@ -44,8 +46,8 @@ k8s/tanka/generate/%: satoshi/check-deps jsonnet/install k8s/tanka/vendor/charts
 ## Apply rendered manifests of an app to the local cluster
 k8s/tanka/apply/%: satoshi/check-deps
 	@app="$*"; \
-	tk apply environments/$$app/local --target 'CustomResourceDefinition/.*' --apply-strategy server --force || true; \
-	tk apply environments/$$app/local --apply-strategy server --force
+	tk apply environments/$$app/local $(TK_APPLY_FLAGS) --target 'CustomResourceDefinition/.*' || true; \
+	tk apply environments/$$app/local $(TK_APPLY_FLAGS)
 
 ## Removes rendered manifests of an app from the local cluster
 k8s/tanka/delete/%: satoshi/check-deps
