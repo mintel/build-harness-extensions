@@ -4,7 +4,6 @@ on:
     branches:
       - test-asdf-ci
 jobs:
-  :
     name: asdf
     runs-on: ubuntu-latest
     steps:
