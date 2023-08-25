@@ -4,7 +4,7 @@ on:
     branches:
       - test-asdf-ci
 jobs:
-    name: asdf
+  asdf:
     runs-on: ubuntu-latest
     steps:
       - name: combine tool-verions
