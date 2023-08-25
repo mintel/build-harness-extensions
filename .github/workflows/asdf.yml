@@ -1,0 +1,16 @@
+name: asdf
+on: [pull_request]
+jobs:
+  asdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3
+      - name: combine tool-verions
+        run: cat modules/satoshi/tf-tool-versions modules/satoshi/k8s-tool-versions > .tool-versions
+        shell: bash
+      - name: setup
+        uses: asdf-vm/actions/setup@v2
+      - name: plugins setup
+        run: grep -E "^#asdf:" '.tool-versions' | cut -d':' -f2- | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c 'asdf cmd' || true
+      - name: install
+        uses: asdf-vm/actions/install@v2
