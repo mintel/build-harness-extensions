@@ -13,5 +13,10 @@ jobs:
         shell: bash
       - name: setup
         uses: asdf-vm/actions/setup@v2
+      - name: plugins
+        run: |
+          asdf plugin add amtool https://gitlab.com/gitlab-com/gl-infra/asdf-promtool.git
+          asdf plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
+          asdf plugin add kyverno-cli https://github.com/hobaen/asdf-kyverno-cli.git
       - name: install
         uses: asdf-vm/actions/install@v2
