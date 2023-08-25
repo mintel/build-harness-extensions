@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: combine tool-verions
-        run: ./.github/scripts/asdf_file_builder.sh
+        run: cat ../modules/satoshi/tf-tool-versions ../modules/satoshi/k8s-tool-versions > .tool-versions
         shell: bash
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3
       - name: setup
