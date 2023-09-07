@@ -27,7 +27,7 @@ if [ "${NAMESPACE}" = "" ]; then
   namespaces+=("(new)")
   PS3="Choose a namespace: "
   select ns in "${namespaces[@]}"; do
-    case $ns in 
+    case $ns in
       "(new)")
         echo -n "Enter new namespace: "
         read -r ns
