@@ -4,7 +4,7 @@ LOCAL_DASHBOARD_DIRECTORY ?= $(shell ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/gr
 BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH ?= main
 CREATE_GRAFANA_INSTANCE ?= true
 GRAFANA_IMAGE ?= grafana/grafana:9.3.6
-GRAFANA_PLUGINS ?= natel-discrete-panel,grafana-piechart-panel,grafana-athena-datasource
+GRAFANA_PLUGINS ?= natel-discrete-panel,grafana-piechart-panel,grafana-athena-datasource,marcusolsson-json-datasource
 MINTEL_BASE_URL ?= mintel.cloud
 # Generally no reason to change these defaults, but values don't matter as long as they're different from eachother
 GRAFANA_LOCAL_DOCKER_NAME = grafana_local
