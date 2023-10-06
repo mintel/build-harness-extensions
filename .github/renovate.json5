@@ -18,7 +18,7 @@
         ".*tool-versions$",
       ],
       matchStrings: [
-        "#\\s*renovate:( datasource=(?<datasource>.*?))? depName=(?<depName>.*?)(?: extractVersion=(?<extractVersion>.+?))?( versioning=(?<versioning>.*?))?( depType=(?<depType>.*?))?\\n[^\\s]+\\s+(?<currentValue?.*)",
+        "#\\s*renovate:( datasource=(?<datasource>.*?))? depName=(?<depName>.*?)(?: extractVersion=(?<extractVersion>.+?))?( versioning=(?<versioning>.*?))?( depType=(?<depType>.*?))?\\n[^\\s]+\\s+(?<currentValue>.*)",
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
       versioningTemplate: "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
