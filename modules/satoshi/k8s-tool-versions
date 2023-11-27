@@ -54,7 +54,7 @@ pluto 5.16.0
 
 #asdf:plugin add tanka
 #renovate: depName=grafana/tanka
-tanka 0.24.0
+tanka 0.26.0
 
 #asdf:plugin add yamllint
 #renovate: depName=adrienverge/yamllint
