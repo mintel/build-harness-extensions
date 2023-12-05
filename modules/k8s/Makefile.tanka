@@ -25,9 +25,13 @@ endif
 
 ## Check if there are any patch files in the charts/ directory and apply them to the relevant charts
 k8s/tanka/charts/patch:
+ifneq ("$(wildcard ./charts)", "")
+ifneq ("$(wildcard ./charts/*.patch)", "")
 	@for f in charts/*.patch; do \
 		patch -d charts -p0 < $$f; \
 	done
+endif
+endif
 
 ## Update Helm Chart
 k8s/tanka/update-chart/%:
