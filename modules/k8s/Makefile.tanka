@@ -27,8 +27,13 @@ endif
 k8s/tanka/charts/patch:
 ifneq ("$(wildcard ./charts)", "")
 ifneq ("$(wildcard ./charts/*.patch)", "")
-	@for f in charts/*.patch; do \
-		patch -d charts -p0 < $$f; \
+	@cd charts ;\
+	for f in *.patch; do \
+		patch --strip=0 --forward --reject-file=$$f.rej < $$f ;\
+		rc=$$? ;\
+		if [[ $$rc -gt 1 ]]; then \
+			exit $$rc ;\
+		fi ;\
 	done
 endif
 endif
