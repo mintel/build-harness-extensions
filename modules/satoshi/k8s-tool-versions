@@ -14,7 +14,7 @@ conftest 0.39.2
 go-jsonnet 0.19.1
 
 #asdf:plugin add helm
-helm 3.11.2
+helm 3.14.3
 
 #asdf:plugin add helm-docs
 #renovate: depName=norwoodj/helm-docs
