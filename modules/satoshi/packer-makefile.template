@@ -14,7 +14,7 @@ bootstrap:
 	git submodule update --init --recursive
 	exit 0
 
-## Install tools and initial jsonnet-deps
+## Install tools
 .PHONY: install
 install:
 	@if [ ! -f .tool-versions ]; then \

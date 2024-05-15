@@ -2,4 +2,5 @@
 .PHONY: packer/update-sources
 ## Pulls in the current version of the `sources.pkr.hcl` file from the packer-repo template
 packer/update-sources:
-	$(shell curl -sSL -o .sources.pkr.hcl "https://gitlab.com/mintel/satoshi/templates/packer-repo/-/raw/develop/sources.pkr.hcl")
+	# TODO: Figure out what to do with token
+	$(shell curl --header "PRIVATE-TOKEN: <TOKEN>" -sSL -o sources.pkr.hcl "https://gitlab.com/api/v4/projects/57900554/repository/files/sources.pkr.hcl/raw?ref=develop")
