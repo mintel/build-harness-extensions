@@ -1,0 +1,6 @@
+#
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-tools/packer'.
+#
+
+#asdf:plugin add packer
+packer 1.10.3

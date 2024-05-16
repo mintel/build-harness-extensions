@@ -1,16 +1,14 @@
 #
-# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile/tf'
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile/packer'
 #
-export HELP_FILTER ?= asdf|satoshi
+export HELP_FILTER ?= asdf|grafana|jsonnet|k8s|kyverno|opa|pluto|satoshi|updater
 -include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
 
-
 ## Init build-harness and build-harness-extensions
 .PHONY: bootstrap
 bootstrap:
-	git init
 	make init
 	if [ ! -d "./build-harness-extensions" ]; then git submodule add https://github.com/mintel/build-harness-extensions.git build-harness-extensions ; fi
 	git submodule update --init --recursive
@@ -19,5 +17,9 @@ bootstrap:
 ## Install tools
 .PHONY: install
 install:
-	make asdf/install
+	@if [ ! -f .tool-versions ]; then \
+		make satoshi/update-tools/packer; \
+	else \
+		make asdf/install; \
+	fi
 	exit 0
