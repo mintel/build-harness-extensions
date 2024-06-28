@@ -4,6 +4,7 @@ LOCAL_DASHBOARD_DIRECTORY ?= $(shell ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/gr
 BUILD_HARNESS_EXTENSIONS_PRIVATE_BRANCH ?= main
 CREATE_GRAFANA_INSTANCE ?= true
 GRAFANA_IMAGE ?= grafana/grafana:9.3.6
+GRAFANA_PORT ?= 3000
 GRAFANA_PLUGINS ?= natel-discrete-panel,grafana-piechart-panel,grafana-athena-datasource,marcusolsson-json-datasource
 MINTEL_BASE_URL ?= mintel.cloud
 # Generally no reason to change these defaults, but values don't matter as long as they're different from eachother
@@ -22,7 +23,7 @@ grafana/develop: grafana/cleanup grafana/setup-local-grafana-mintel grafana/setu
 ## Develop grafana dashboards without setting up datasources.
 grafana/develop-oss: grafana/cleanup grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
 else
-## Set the CREATE_GRAFANA_INSTANCE variable to false if you already have a localhost:3000 grafana instance and just want to run the syncer
+## Set the CREATE_GRAFANA_INSTANCE variable to false if you already have a local grafana instance and just want to run the syncer
 grafana/develop: grafana/setup-grafana-syncer
 grafana/develop-oss: grafana/setup-grafana-syncer
 endif
@@ -48,19 +49,19 @@ grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/private
 	@docker pull $(GRAFANA_IMAGE)
 	@. ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/datasource_credentials.sh && \
 	MINTEL_BASE_URL='$(MINTEL_BASE_URL)' \
-	docker run --rm -d -p 3000:3000 --user $(id):$(id) -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning -v ${HOME}/.aws:/usr/share/grafana/.aws --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin -e GF_AUTH_ANONYMOUS_ENABLED=true  -e GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS} -e GF_FEATURE_TOGGLES_ENABLE=traceqlEditor -e AWS_PROFILE=${AWS_PROFILE} -e AWS_SDK_LOAD_CONFIG=true -e AWS_EC2_METADATA_DISABLED=1 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
+	docker run --rm -d -p ${GRAFANA_PORT}:3000 --user $(id):$(id) -v ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/provisioning:/etc/grafana/provisioning -v ${HOME}/.aws:/usr/share/grafana/.aws --env-file ${TMP_GITLAB_REPO_DIRECTORY}/modules/grafana/env.list -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin -e GF_AUTH_ANONYMOUS_ENABLED=true  -e GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS} -e GF_FEATURE_TOGGLES_ENABLE=traceqlEditor -e AWS_PROFILE=${AWS_PROFILE} -e AWS_SDK_LOAD_CONFIG=true -e AWS_EC2_METADATA_DISABLED=1 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
 grafana/setup-local-grafana-oss:
 	@docker pull $(GRAFANA_IMAGE)
-	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
+	@docker run --rm -d -p ${GRAFANA_PORT}:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
 
 grafana/setup-grafana-syncer:
 ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 # Give the grafana instance time to start up before changing the admin password in order to avoid errors
-	@echo "Starting grafana on localhost:3000 ..."
+	@echo "Starting grafana on localhost:${GRAFANA_PORT} ..."
 	# Need to sleep for a bit and wait for plugins to be installed...
 	@sleep 6
 	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
 endif
 	@docker pull mintel/grafana-local-sync:latest
-	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
+	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY} -addr http://localhost:${GRAFANA_PORT}
 	@$(MAKE) grafana/cleanup
