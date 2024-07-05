@@ -2,6 +2,12 @@
 # DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-tools/tf'.
 #
 
+#asdf:plugin add gomplate
+gomplate v3.11.8
+
+#asdf:plugin add hcl2json
+hcl2json 0.6.3
+
 #asdf:plugin add opentofu
 opentofu 1.7.1
 
