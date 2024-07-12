@@ -5,7 +5,7 @@ export KIND_INSTALL_DOCKER_REGISTRY?=1
 
 ## DEPRECATED: Create KinD local cluster (use k3d instead)
 kind/create:
-	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/kind//kind.sh create
+	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/kind/kind.sh create
 
 ## DEPRECATED: Delete a Kubernetes KinD local cluster (use k3d instead)
 kind/delete:
