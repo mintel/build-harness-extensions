@@ -1,7 +1,7 @@
 ## OPA (open-policy-agent) helpers
 OPA_POLICY_BRANCH?=main
 OPA_POLICY_DIR=/tmp/opa-policy
-OPA_POLICY_SUBDIR=opa/kubernetes
+OPA_POLICY_SUBDIR?=opa/kubernetes
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
 .PHONY: opa/check-env opa/clone-policy opa/conftest
@@ -28,7 +28,7 @@ opa/clone-policy: opa/check-env
 opa/conftest: satoshi/check-deps opa/clone-policy
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
-		if ! conftest test --output stdout $$dir/*.yaml -p $(OPA_POLICY_DIR)/$(OPA_POLICY_SUBDIR); then \
+		if ! conftest test --output stdout $$dir/*.yaml -p $(OPA_POLICY_DIR)/opa/kubernetes/policy/utils.rego -p $(OPA_POLICY_DIR)/$(OPA_POLICY_SUBDIR); then \
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
