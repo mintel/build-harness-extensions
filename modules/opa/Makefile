@@ -1,8 +1,9 @@
 ## OPA (open-policy-agent) helpers
 OPA_POLICY_BRANCH?=main
-OPA_POLICY_DIR=/tmp/opa-policy
+OPA_POLICY_DIR=/tmp/opa-policy-=$(OPA_POLICY_BRANCH)
 OPA_POLICY_SUBDIR?=opa/kubernetes
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
+CONSTANTS_APPS_FILE := $(shell mktemp -p /tmp applications.XXXXX.yaml)
 
 .PHONY: opa/check-env opa/clone-policy opa/conftest
 
@@ -24,14 +25,25 @@ opa/clone-policy: opa/check-env
 	fi ;\
 	git clone --depth=1 $(OPA_POLICY_REPO) -b $(OPA_POLICY_BRANCH) $(OPA_POLICY_DIR) ;\
 
+## Fetch application constants and convert to a format rego can import (requires CONSTANTS_URL argument)
+opa/fetch-constants:
+ifndef CONSTANTS_URL
+	$(error CONSTANTS_URL is undefined)
+endif
+	@curl -s $(CONSTANTS_URL)/applications.json | yq '{"applications": .}' > $(CONSTANTS_APPS_FILE)
+
 ## Validate manifests
-opa/conftest: satoshi/check-deps opa/clone-policy
+opa/conftest: satoshi/check-deps opa/clone-policy opa/fetch-constants
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
-		if ! conftest test --output stdout $$dir/*.yaml -p $(OPA_POLICY_DIR)/opa/kubernetes/policy/utils.rego -p $(OPA_POLICY_DIR)/$(OPA_POLICY_SUBDIR); then \
+		if ! conftest test --output stdout $$dir/*.yaml \
+		-d ${CONSTANTS_APPS_FILE} \
+		-p $(OPA_POLICY_DIR)/opa/kubernetes/policy/utils.rego \
+		-p $(OPA_POLICY_DIR)/$(OPA_POLICY_SUBDIR); then \
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
+	rm -f $(CONSTANTS_APPS_FILE) ;\
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		exit 1; \
 	fi
