@@ -45,7 +45,7 @@ kyverno-cli 1.10.0
 
 #asdf:plugin add opa
 #renovate: depName=open-policy-agent/opa
-opa 0.50.0
+opa 0.68.0
 
 #asdf:plugin add pluto
 #renovate: depName=FairwindsOps/pluto
