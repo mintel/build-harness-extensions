@@ -43,6 +43,7 @@ opa/conftest: satoshi/check-deps opa/clone-policy opa/fetch-constants
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
+	rm -f $(CONSTANTS_APPS_FILE) ;\
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		exit 1; \
 	fi
