@@ -30,7 +30,7 @@ opa/fetch-constants:
 ifndef CONSTANTS_URL
 	$(error CONSTANTS_URL is undefined)
 endif
-	@curl --retry --retry-all-errors --fail -s -o $(CONSTANTS_APPS_FILE).curl $(CONSTANTS_URL)/applications.json && yq '{"applications": .}' $(CONSTANTS_APPS_FILE).curl > $(CONSTANTS_APPS_FILE)
+	@curl --retry 5 --retry-all-errors --fail -s -o $(CONSTANTS_APPS_FILE).curl $(CONSTANTS_URL)/applications.json && yq '{"applications": .}' $(CONSTANTS_APPS_FILE).curl > $(CONSTANTS_APPS_FILE)
 
 ## Validate manifests
 opa/conftest: satoshi/check-deps opa/clone-policy opa/fetch-constants
