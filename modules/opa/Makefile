@@ -1,6 +1,6 @@
 ## OPA (open-policy-agent) helpers
 OPA_POLICY_BRANCH?=main
-OPA_POLICY_DIR=/tmp/opa-policy-=$(OPA_POLICY_BRANCH)
+OPA_POLICY_DIR=/tmp/opa-policy-$(OPA_POLICY_BRANCH)
 OPA_POLICY_SUBDIR?=opa/kubernetes
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 CONSTANTS_APPS_FILE := $(shell mktemp -p /tmp applications.XXXXX.yaml)
@@ -30,7 +30,7 @@ opa/fetch-constants:
 ifndef CONSTANTS_URL
 	$(error CONSTANTS_URL is undefined)
 endif
-	@curl -s $(CONSTANTS_URL)/applications.json | yq '{"applications": .}' > $(CONSTANTS_APPS_FILE)
+	@curl --retry-all-errors -s -o $(CONSTANTS_APPS_FILE).curl $(CONSTANTS_URL)/applications.json && yq '{"applications": .}' $(CONSTANTS_APPS_FILE).curl > $(CONSTANTS_APPS_FILE)
 
 ## Validate manifests
 opa/conftest: satoshi/check-deps opa/clone-policy opa/fetch-constants
@@ -44,6 +44,7 @@ opa/conftest: satoshi/check-deps opa/clone-policy opa/fetch-constants
 		fi ;\
 	done ;\
 	rm -f $(CONSTANTS_APPS_FILE) ;\
+	rm -f $(CONSTANTS_APPS_FILE).curl ;\
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		exit 1; \
 	fi
