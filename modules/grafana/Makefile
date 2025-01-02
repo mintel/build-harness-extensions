@@ -87,7 +87,7 @@ ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 	@echo "Starting grafana on localhost:3000 ..."
 	# Need to sleep for a bit and wait for plugins to be installed...
 	@while ! curl -s localhost:3000/api/health > /dev/null; do sleep 0.25; done
-	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
+	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
 endif
 	@docker pull mintel/grafana-local-sync:latest
 	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
