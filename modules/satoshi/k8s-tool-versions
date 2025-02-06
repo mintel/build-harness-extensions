@@ -30,7 +30,7 @@ k3d 5.2.2
 
 #asdf:plugin add kubectl
 #renovate: depName=kubernetes/kubernetes
-kubectl 1.30.8
+kubectl 1.31.5
 
 #asdf:plugin add kubeval
 #renovate: depName=instrumenta/kubeval
