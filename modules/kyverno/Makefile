@@ -28,9 +28,15 @@ kyverno/clone-policy: kyverno/check-env
 ## Validate manifests
 kyverno/test: satoshi/check-deps kyverno/clone-policy
 	@errs=0;
-	@for dir in $(MANIFEST_DIRS) ; do \
-		echo "Testing dir $$dir..."; \
-		if ! printf -- '--resource\0%s\0'  $$dir/*.yaml | xargs -0 kyverno apply $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR); then \
+	pushd $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR) ;\
+	yq eval-all *.ClusterPolicy*.yaml > combined-cluster-policies.yaml ;\
+	yq eval --inplace 'del(.metadata.namespace)' combined-cluster-policies.yaml ;\
+	yq eval --inplace 'del(.metadata.labels["app.mintel.com/region"])' combined-cluster-policies.yaml ;\
+	yq eval-all *.PolicyException*.yaml > combined-policy-exceptions.yaml ;\
+	yq eval --inplace '.apiVersion="kyverno.io/v2"' combined-policy-exceptions.yaml ;\
+	popd ;\
+	for dir in $(MANIFEST_DIRS) ; do \
+		if ! printf -- '--resource\0%s\0' $$(find $${dir} -type f -name 'apps-v1.Deployment*.yaml'-o -name 'apps-v1.StatefulSet*' -o -name 'apps-v1.DaemonSet*' -o -name 'batch-v1.CronJob*' -o -name 'batch-v1.Job*') | xargs -0 kyverno apply --table $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)/combined-cluster-policies.yaml --exceptions $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)/combined-policy-exceptions.yaml; then \
 			errs=$$(( $$errs + 1 )); \
 		fi ;\
 	done ;\
