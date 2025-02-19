@@ -33,7 +33,6 @@ kyverno/test: satoshi/check-deps kyverno/clone-policy
 	yq eval --inplace 'del(.metadata.namespace)' combined-cluster-policies.yaml ;\
 	yq eval --inplace 'del(.metadata.labels["app.mintel.com/region"])' combined-cluster-policies.yaml ;\
 	yq eval-all *.PolicyException*.yaml > combined-policy-exceptions.yaml ;\
-	yq eval --inplace '.apiVersion="kyverno.io/v2"' combined-policy-exceptions.yaml ;\
 	popd ;\
 	for dir in $(MANIFEST_DIRS) ; do \
 		matchedfiles=$$(find $${dir} -type f -name 'apps-v1.Deployment*.yaml' -o -name 'apps-v1.StatefulSet*' -o -name 'apps-v1.DaemonSet*' -o -name 'batch-v1.CronJob*' -o -name 'batch-v1.Job*') ;\
