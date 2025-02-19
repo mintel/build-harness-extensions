@@ -38,7 +38,6 @@ kyverno/test: satoshi/check-deps kyverno/clone-policy
 		matchedfiles=$$(find $${dir} -type f -name 'apps-v1.Deployment*.yaml' -o -name 'apps-v1.StatefulSet*' -o -name 'apps-v1.DaemonSet*' -o -name 'batch-v1.CronJob*' -o -name 'batch-v1.Job*') ;\
 		if [ ! -z "$${matchedfiles}" ]; then \
 			if ! printf -- '--resource\0%s\0' $$(find $${dir} -type f -name 'apps-v1.Deployment*.yaml' -o -name 'apps-v1.StatefulSet*' -o -name 'apps-v1.DaemonSet*' -o -name 'batch-v1.CronJob*' -o -name 'batch-v1.Job*') | xargs -0 kyverno apply --table $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)/combined-cluster-policies.yaml --exceptions $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)/combined-policy-exceptions.yaml; then \
-				exit 1; \
 				errs=$$(( $$errs + 1 )); \
 			fi ;\
 		fi; \
