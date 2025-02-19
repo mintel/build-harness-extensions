@@ -41,7 +41,7 @@ kustomize 5.0.1
 
 #asdf:plugin add kyverno-cli https://github.com/hobaen/asdf-kyverno-cli.git
 #renovate: depName=kyverno/kyverno
-kyverno-cli 1.10.0
+kyverno-cli 1.13.4
 
 #asdf:plugin add opa
 #renovate: depName=open-policy-agent/opa
