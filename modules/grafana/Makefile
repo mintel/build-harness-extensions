@@ -63,7 +63,7 @@ grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/core-clust
 	@. ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/datasource_credentials.sh && \
 		MINTEL_BASE_URL='$(MINTEL_BASE_URL)' \
 		docker run \
-			--rm -d -p 3000:3000 --user $(id):$(id) \
+			--rm -d -p 3000:3000 --user $(shell id -u):$(shell id -u) \
 			-v ${TMP_GRAFANA_DATASOURCES}:/etc/grafana/provisioning/datasources/automatic.yml \
 			-v ${HOME}/.aws:/usr/share/grafana/.aws \
 			--env-file ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/env.list \
@@ -90,5 +90,5 @@ ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 	@docker exec -it ${GRAFANA_LOCAL_DOCKER_NAME} grafana cli --homepath "/usr/share/grafana" admin reset-admin-password ${GRAFANA_ADMIN_PASSWORD}
 endif
 	@docker pull mintel/grafana-local-sync:latest
-	@docker run --rm -it --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
+	@docker run --rm -it --user $(shell id -u):$(shell id -u) --mount type=bind,source=$$PWD/${LOCAL_DASHBOARD_DIRECTORY},target=${CONTAINER_DASHBOARD_DIRECTORY}/LocalDev --network="host" --user $$id:1000 --name ${GRAFANA_SYNC_DOCKER_NAME} mintel/grafana-local-sync:latest -user admin -pass ${GRAFANA_ADMIN_PASSWORD} -dir ${CONTAINER_DASHBOARD_DIRECTORY}
 	@$(MAKE) grafana/cleanup
