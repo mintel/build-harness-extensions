@@ -84,7 +84,6 @@ grafana/setup-local-grafana-oss:
 	@docker run --rm -d -p 3000:3000 --name ${GRAFANA_LOCAL_DOCKER_NAME} $(GRAFANA_IMAGE)
 
 grafana/setup-grafana-syncer:
-	@set -x;
 ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 # Give the grafana instance time to start up before changing the admin password in order to avoid errors
 	@echo "Starting grafana on localhost:3000 ..."
