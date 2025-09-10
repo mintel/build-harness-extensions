@@ -4,6 +4,7 @@ OPA_POLICY_DIR=/tmp/opa-policy-$(OPA_POLICY_BRANCH)
 OPA_POLICY_SUBDIR?=opa/kubernetes
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 CONSTANTS_APPS_FILE := $(shell mktemp -p /tmp applications.XXXXX.yaml)
+CONSTANTS_BACKSTAGE_FILE := $(shell mktemp -p /tmp backstage.XXXXX.json)
 
 .PHONY: opa/check-env opa/clone-policy opa/conftest
 
@@ -31,13 +32,14 @@ ifndef CONSTANTS_URL
 	$(error CONSTANTS_URL is undefined)
 endif
 	@curl --retry 5 --retry-all-errors --fail -s -o $(CONSTANTS_APPS_FILE).curl $(CONSTANTS_URL)/applications.json && yq '{"applications": .}' $(CONSTANTS_APPS_FILE).curl > $(CONSTANTS_APPS_FILE)
+	@curl --retry 5 --retry-all-errors --fail -s -o $(CONSTANTS_BACKSTAGE_FILE).curl $(CONSTANTS_URL)/backstage.json && jq '{"backstage_components": .components.default | keys}' $(CONSTANTS_BACKSTAGE_FILE).curl > $(CONSTANTS_BACKSTAGE_FILE)
 
 ## Validate manifests
 opa/conftest: satoshi/check-deps opa/clone-policy opa/fetch-constants
 	@errs=0;
 	@for dir in $(MANIFEST_DIRS) ; do \
 		if ! conftest test --output stdout $$dir/*.yaml \
-		-d ${CONSTANTS_APPS_FILE} \
+		-d ${CONSTANTS_APPS_FILE} -d ${CONSTANTS_BACKSTAGE_FILE} \
 		-p $(OPA_POLICY_DIR)/opa/kubernetes/policy/utils.rego \
 		-p $(OPA_POLICY_DIR)/$(OPA_POLICY_SUBDIR); then \
 			errs=$$(( $$errs + 1 )); \
