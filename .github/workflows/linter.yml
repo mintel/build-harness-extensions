@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@f52d78284b4941028952125a10c76676c3d456eb # v1
+        uses: reviewdog/action-shellcheck@4c07458293ac342d477251099501a718ae5ef86e # v1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review # Change reporter.
