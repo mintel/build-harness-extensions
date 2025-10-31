@@ -57,9 +57,14 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   k8s/kubeval/validate                Validate manifests
   k8s/tanka/apply/%                   Apply rendered manifests of an app to the local cluster
   k8s/tanka/delete/%                  Removes rendered manifests of an app from the local cluster
+  k8s/tanka/diff                      Diff Tanka files against expected golden
+  k8s/tanka/diff-help                 Help regarding Tanka diff
   k8s/tanka/fmt                       Format Jsonnet files with tanka
   k8s/tanka/fmt-test                  Test formatting of Jsonnet files and exit with non-zero when changes would be made
+  k8s/tanka/gen-golden                Generate expected golden files from Tanka
   k8s/tanka/generate                  Generate manifests using tanka including support for kustomize
+  k8s/tanka/rm-golden                 Remove golden files from Tanka tests
+  k8s/tanka/test                      Run Tanka tests
   opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
   satoshi/check-asdf-dep              Check dependencies (installer) for Satoshi

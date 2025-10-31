@@ -9,7 +9,13 @@ endif
 
 TK_APPLY_FLAGS ?= --apply-strategy=server --force
 
-.PHONY: k8s/tanka/charts/vendor k8s/tanka/charts/patch k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/%
+## Tanka test helpers
+TANKA_TEST_FILES=$(wildcard ./*/tests/test.jsonnet) $(wildcard ./tests/*.jsonnet)
+TANKA_GOLDEN_FILES=$(wildcard ./*/tests/test-golden.json) $(wildcard ./tests/*-golden.json)
+TANKA_PHONY_GOLDEN=$(patsubst %.jsonnet,%-golden.json,$(TANKA_TEST_FILES))
+TANKA_PHONY_DIFF=$(patsubst %.jsonnet,%.diff,$(TANKA_TEST_FILES))
+
+.PHONY: k8s/tanka/charts/vendor k8s/tanka/charts/patch k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/% k8s/tanka/test k8s/tanka/diff k8s/tanka/gen-golden k8s/tanka/rm-golden k8s/tanka/diff-help
 
 ## Vendor charts
 k8s/tanka/charts/vendor:
@@ -72,3 +78,28 @@ k8s/tanka/delete/%: satoshi/check-deps
 ## Creates a new app in the existing repo
 k8s/tanka/add/%: satoshi/check-deps
 	@@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/k8s/tanka/new-app.sh $*
+
+## Run Tanka tests
+k8s/tanka/test: jsonnet/install k8s/tanka/diff
+
+## Diff Tanka files against expected golden
+k8s/tanka/diff: k8s/tanka/diff-help $(TANKA_PHONY_DIFF)
+
+%.diff: %.jsonnet
+	diff -u $(*)-golden.json <(tk eval $(<))
+
+%-golden.json: %.jsonnet
+	tk eval $(<) > $(@)
+
+## Remove golden files from Tanka tests
+k8s/tanka/rm-golden:
+	rm -f $(TANKA_GOLDEN_FILES)
+
+## Generate expected golden files from Tanka
+k8s/tanka/gen-golden: k8s/tanka/rm-golden $(TANKA_PHONY_GOLDEN)
+
+## Help regarding Tanka diff
+k8s/tanka/diff-help:
+	@echo "NOTE: if the 'k8s/tanka/diff' target fails, review output and run:"
+	@echo "      $(MAKE) k8s/tanka/gen-golden k8s/tanka/diff"
+	@echo
