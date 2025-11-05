@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME=$1
+COMPONENT_NAME=$1
 
 NAMESPACE=${NAMESPACE:-""}
 OWNER=${OWNER:-""}
@@ -10,12 +10,12 @@ PORT=${PORT:-""}
 
 echo ""
 
-if [ -z "${APP_NAME}" ]; then
-  echo "Must specify an application name"
+if [ -z "${COMPONENT_NAME}" ]; then
+  echo "Must specify a component name"
   exit 1
 fi
-if [ -d "lib/${APP_NAME}" ] || [ -d "environments/${APP_NAME}" ]; then
-  echo "Application already exists by the name '${APP_NAME}'"
+if [ -d "lib/${COMPONENT_NAME}" ] || [ -d "environments/${COMPONENT_NAME}" ]; then
+  echo "Component already exists by the name '${COMPONENT_NAME}'"
   exit 1
 fi
 
@@ -67,18 +67,21 @@ if [ "${PORT}" = "" ]; then
 fi
 
 # shellcheck disable=SC2086
-mkdir -p lib/${APP_NAME}
+mkdir -p lib/${COMPONENT_NAME}
 # shellcheck disable=SC2086
-mkdir -p environments/${APP_NAME}/{local,aws.dev,aws.qa,aws.prod}
+mkdir -p environments/${COMPONENT_NAME}/{local,aws.dev,aws.qa,aws.prod}
 
 
 echo "local m = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
 {
   _config+:: {
+    backstage: {
+      component: '${COMPONENT_NAME}',
+    },
+    name: '${COMPONENT_NAME}',
     namespace: '${NAMESPACE}',
-    partOf: '${APP_NAME}',
     owner: '${OWNER}',
-    name: '${APP_NAME}',
+    partOf: '${COMPONENT_NAME}',
   },
 
   appValues:: {
@@ -105,7 +108,7 @@ echo "local m = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-js
 
   app:
     m.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
-}" > "lib/${APP_NAME}/base.libsonnet"
+}" > "lib/${COMPONENT_NAME}/base.libsonnet"
 
 environments=("local" "aws.dev" "aws.qa" "aws.prod")
 for ENV in "${environments[@]}"
@@ -119,9 +122,9 @@ do
   apiVersion: 'tanka.dev/v1alpha1',
   kind: 'Environment',
   metadata: {
-    name: 'environments/${APP_NAME}/${ENV}',
+    name: 'environments/${COMPONENT_NAME}/${ENV}',
     labels: {
-      app: '${APP_NAME}',
+      app: '${COMPONENT_NAME}',
       env: '${ENV}',
     },
   },
@@ -130,13 +133,13 @@ do
   },
   data:
     (import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/cluster-env-jsonnet/${ENV}.libsonnet') +
-    (import '${APP_NAME}/base.libsonnet') +
+    (import '${COMPONENT_NAME}/base.libsonnet') +
     {
       appValues+:: {
       },
     },
-}" > "environments/${APP_NAME}/${ENV}/main.jsonnet"
+}" > "environments/${COMPONENT_NAME}/${ENV}/main.jsonnet"
 done
 
 echo
-echo "Make sure you review and edit the generated ./lib/${APP_NAME}/base.libsonnet file"
+echo "Make sure you review and edit the generated ./lib/${COMPONENT_NAME}/base.libsonnet file"
