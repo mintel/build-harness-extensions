@@ -75,13 +75,12 @@ find_jsonnet() {
 mkdir -p "$(pwd)/rendered/"
 touch "$(pwd)/rendered/.gitkeep"
 
-# CPT-805: If tk env list fails, print stderr and exit but filter any TRACE messages; these will appear anyway during
-# the tk export so we don't need them here and they produce quite a lot of spam. This means that we can send stderr to
-# /dev/null below without losing any of the error messages we need when debugging.
-err=$(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>&1 | grep -v TRACE) && rc=$? || rc=$?
-if [[ $rc != 0 ]]; then
-	echo "$err"
-	exit "$rc"
+# Try to get a list of environments and print stdout and stderr if it fails
+env_list=$(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>&1) || (echo "$env_list"; exit 1)
+# If no environments are returned. Exit here; we don't need to render anything.
+if [[ $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" | wc -l) -eq 0 ]]; then
+  echo "No environments found. Exiting."
+  exit 0
 fi
 
 # Export rendered manifests for each environment into a tmp dir
