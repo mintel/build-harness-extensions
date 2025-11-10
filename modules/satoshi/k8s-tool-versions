@@ -43,6 +43,10 @@ kustomize 5.0.1
 #renovate: depName=kyverno/kyverno
 kyverno-cli 1.13.4
 
+#asdf:plugin add mimirtool https://github.com/asdf-community/asdf-mimirtool.git
+#renovate: depName=grafana/mimir
+mimirtool 2.17.2
+
 #asdf:plugin add opa
 #renovate: depName=open-policy-agent/opa
 opa 0.68.0
