@@ -2,21 +2,21 @@
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 TEMP_ALERTS_DIR := /tmp/mimirtool-alerts
 
-.PHONY: mimirtool/check-env mimirtool/rules/lint mimirtool/clean
+.PHONY: k8s/mimirtool/check-env k8s/mimirtool/rules/lint k8s/mimirtool/clean
 
 # Check mimirtool environment is suitable
-mimirtool/check-env:
+k8s/mimirtool/check-env:
 	@if [ ! -d ./rendered ]; then \
 		echo "rendered manifests directory does not exist, run: make tanka/generate" ;\
 		exit 1 ;\
 	fi
 
 # Clean temporary files
-mimirtool/clean:
+k8s/mimirtool/clean:
 	@rm -rf $(TEMP_ALERTS_DIR)
 
 ## Validate PrometheusRule alerts
-mimirtool/rules/lint: mimirtool/check-env mimirtool/clean
+k8s/mimirtool/rules/lint: satoshi/check-deps k8s/mimirtool/check-env k8s/mimirtool/clean
 	@mkdir -p $(TEMP_ALERTS_DIR)
 	@errs=0; \
 	for dir in $(MANIFEST_DIRS); do \
@@ -25,17 +25,17 @@ mimirtool/rules/lint: mimirtool/check-env mimirtool/clean
 			echo "Validating PrometheusRules in $${dir}..."; \
 			for rulefile in $${rulefiles}; do \
 				filename=$$(basename $${rulefile}); \
-				echo "  Checking $${filename}..."; \
+				echo "  Checking $${rulefile}..."; \
 				if ! yq eval '.spec' $${rulefile} > $(TEMP_ALERTS_DIR)/$${filename}.spec.yaml; then \
-					echo "Failed to extract .spec from $${filename}"; \
+					echo "Failed to extract .spec from $${rulefile}"; \
 					errs=$$(( $$errs + 1 )); \
 					continue; \
 				fi; \
 				if ! mimirtool rules lint $(TEMP_ALERTS_DIR)/$${filename}.spec.yaml; then \
-					echo "Validation failed for $${filename}"; \
+					echo "Validation failed for $${rulefile}"; \
 					errs=$$(( $$errs + 1 )); \
 				else \
-					echo "Validation passed for $${filename}"; \
+					echo "Validation passed for $${rulefile}"; \
 				fi; \
 			done; \
 		fi; \
