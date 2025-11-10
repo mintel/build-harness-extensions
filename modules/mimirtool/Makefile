@@ -28,17 +28,17 @@ mimirtool/rules/lint: mimirtool/check-env mimirtool/clean
 				echo "  Checking $${filename}..."; \
 				if ! yq eval '.spec' $${rulefile} > $(TEMP_ALERTS_DIR)/$${filename}.spec.yaml; then \
 					echo "Failed to extract .spec from $${filename}"; \
-          				errs=$$(( $$errs + 1 )); \
-          				continue; \
-        	fi; \
-        	if ! mimirtool rules lint $(TEMP_ALERTS_DIR)/$${filename}.spec.yaml; then \
-          		echo "Validation failed for $${filename}"; \
+	         				errs=$$(( $$errs + 1 )); \
+	         				continue; \
+	       	fi; \
+	       	if ! mimirtool rules lint $(TEMP_ALERTS_DIR)/$${filename}.spec.yaml; then \
+	         		echo "Validation failed for $${filename}"; \
 			errs=$$(( $$errs + 1 )); \
-        	else \
-          		echo "Validation passed for $${filename}"; \
+	       	else \
+	         		echo "Validation passed for $${filename}"; \
 				fi; \
 			done; \
-    		fi; \
+	   		fi; \
 	done; \
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		echo "Validation failed with $${errs} error(s)"; \
