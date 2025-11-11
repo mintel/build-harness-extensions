@@ -4,7 +4,7 @@ S_YLW := $(shell tput setaf 3 2> /dev/null || true)
 S_RST := $(shell tput sgr0 2> /dev/null || true)
 S_BLD := $(shell tput bold 2> /dev/null || true)
 
-REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq
+REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq mimirtool
 
 .PHONY: satoshi/check-deps satoshi/check-asdf-dep satoshi/update-makefile satoshi/update-tools
 
