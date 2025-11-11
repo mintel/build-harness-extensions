@@ -22,7 +22,7 @@ k8s/mimirtool/rules/lint: satoshi/check-deps k8s/mimirtool/check-env k8s/mimirto
 	for dir in $(MANIFEST_DIRS); do \
 		rulefiles=$$(find $${dir} -type f -name '*PrometheusRule*.yaml'); \
 		if [ ! -z "$${rulefiles}" ]; then \
-			echo "Validating PrometheusRules in $${dir}..."; \
+			echo "Validating PrometheusRules in $${dir}"; \
 			for rulefile in $${rulefiles}; do \
 				filename=$$(basename $${rulefile}); \
 				echo "  Checking $${rulefile}..."; \
