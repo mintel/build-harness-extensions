@@ -87,6 +87,18 @@ fi
 TMP_RENDERED="$(mktemp -d)"
 echo "Rendering manifests to $TMP_RENDERED..."
 tk export "$TMP_RENDERED/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts
+
+# Filter out GrafanaDashboard CRs from non-monitoring clusters
+# Dashboards should only be deployed to aws.dev.monitoring and aws.logs
+echo "Filtering GrafanaDashboard manifests from non-monitoring clusters..."
+while IFS= read -r -d '' manifest; do
+  # Extract the environment name (e.g., aws.dev, aws.prod) from the path
+  # Path format: $TMP_RENDERED/environments/<app>/<env>/manifests/<file>.yaml
+  env_name=$(echo "$manifest" | sed -E 's|.*/environments/[^/]+/([^/]+)/manifests/.*|\1|')
+  if [[ "$env_name" != "aws.dev.monitoring" && "$env_name" != "aws.logs" ]]; then
+    rm -f "$manifest"
+  fi
+done < <(find "$TMP_RENDERED" -name "*GrafanaDashboard*.yaml" -print0 2>/dev/null)
 function finish {
   rm -rf "$TMP_RENDERED"
 }
