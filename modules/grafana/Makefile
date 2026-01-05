@@ -73,6 +73,8 @@ grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/core-clust
 			-e GF_AUTH_ANONYMOUS_ENABLED=true \
 			-e GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS} \
 			-e GF_FEATURE_TOGGLES_ENABLE=traceqlEditor \
+			-e GF_DATAPROXY_TIMEOUT=300 \
+			-e GF_DATAPROXY_KEEP_ALIVE_SECONDS=300 \
 			-e AWS_PROFILE \
 			-e AWS_SDK_LOAD_CONFIG=true \
 			-e AWS_EC2_METADATA_DISABLED=1 \
