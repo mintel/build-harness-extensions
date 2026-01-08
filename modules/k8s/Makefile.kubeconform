@@ -1,7 +1,7 @@
 ## Kubeconform helpers
 KUBECONFORM_K8S_VERSION?=1.32.11
 KUBECONFORM_IGNORE_FILENAME_PATTERNS?=kustomization.yaml
-KUBECONFORM_ARGS?=-strict -summary -ignore-missing-schemas -skip-failed-schemas
+KUBECONFORM_ARGS?=-strict -summary -ignore-missing-schemas
 K8S_RENDERED_DIR?=./rendered/environments
 
 .PHONY: k8s/kubeconform/validate
