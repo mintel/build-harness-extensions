@@ -85,8 +85,10 @@ fi
 
 # Export rendered manifests for each environment into a tmp dir
 TMP_RENDERED="$(mktemp -d)"
+TANKA_CACHE_DIR="${TANKA_REPO_DIR}/.tanka-cache"
+mkdir -p "$TANKA_CACHE_DIR"
 echo "Rendering manifests to $TMP_RENDERED..."
-tk export "$TMP_RENDERED/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts
+tk export "$TMP_RENDERED/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts -c "$TANKA_CACHE_DIR" -e '.*'
 
 # Filter out GrafanaDashboard CRs from non-monitoring clusters
 # Dashboards should only be deployed to aws.dev.monitoring and aws.logs
