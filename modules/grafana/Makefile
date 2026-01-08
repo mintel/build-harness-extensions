@@ -3,7 +3,7 @@ GRAFANA_ADMIN_PASSWORD ?= admin
 LOCAL_DASHBOARD_DIRECTORY ?= $(shell ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/local_dashboard_directory_prompt.sh)
 CORE_CLUSTER_JSONNET_BRANCH ?= main
 CREATE_GRAFANA_INSTANCE ?= true
-GRAFANA_IMAGE ?= grafana/grafana:11.3.0
+GRAFANA_IMAGE ?= grafana/grafana:12.3.1
 GRAFANA_PLUGINS ?= natel-discrete-panel,grafana-piechart-panel,grafana-athena-datasource,marcusolsson-json-datasource,yesoreyeram-infinity-datasource
 MINTEL_BASE_URL ?= mintel.cloud
 # Generally no reason to change these defaults, but values don't matter as long as they're different from eachother
