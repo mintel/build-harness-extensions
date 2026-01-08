@@ -15,7 +15,7 @@ TANKA_GOLDEN_FILES=$(wildcard ./*/tests/test-golden.json) $(wildcard ./tests/*-g
 TANKA_PHONY_GOLDEN=$(patsubst %.jsonnet,%-golden.json,$(TANKA_TEST_FILES))
 TANKA_PHONY_DIFF=$(patsubst %.jsonnet,%.diff,$(TANKA_TEST_FILES))
 
-.PHONY: k8s/tanka/charts/vendor k8s/tanka/charts/patch k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/% k8s/tanka/test k8s/tanka/diff k8s/tanka/gen-golden k8s/tanka/rm-golden k8s/tanka/diff-help
+.PHONY: k8s/tanka/charts/vendor k8s/tanka/charts/patch k8s/tanka/fmt k8s/tanka/fmt-test k8s/tanka/lint k8s/tanka/generate k8s/tanka/generate/% k8s/tanka/apply/% k8s/tanka/delete/% k8s/tanka/update-chart/% k8s/tanka/new-app/% k8s/tanka/test k8s/tanka/diff k8s/tanka/gen-golden k8s/tanka/rm-golden k8s/tanka/diff-help
 
 ## Vendor charts
 k8s/tanka/charts/vendor:
@@ -55,6 +55,10 @@ k8s/tanka/fmt: satoshi/check-deps
 ## Test formatting of Jsonnet files and exit with non-zero when changes would be made
 k8s/tanka/fmt-test: satoshi/check-deps
 	tk fmt --test .
+
+## Lint Jsonnet files with tanka
+k8s/tanka/lint: satoshi/check-deps
+	tk lint .
 
 ## Generate manifests using tanka
 k8s/tanka/generate: satoshi/check-deps jsonnet/install k8s/tanka/charts/vendor k8s/tanka/charts/patch
