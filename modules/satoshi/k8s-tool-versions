@@ -14,7 +14,7 @@ conftest 0.55.0
 go-jsonnet 0.19.1
 
 #asdf:plugin add helm
-helm 3.11.2
+helm 3.14.4
 
 #asdf:plugin add helm-docs
 #renovate: depName=norwoodj/helm-docs
@@ -28,9 +28,13 @@ jb 0.5.1
 #renovate: depName=k3d-io/k3d
 k3d 5.2.2
 
+#asdf:plugin add kubeconform
+#renovate: depName=yannh/kubeconform
+kubeconform 0.6.4
+
 #asdf:plugin add kubectl
 #renovate: depName=kubernetes/kubernetes
-kubectl 1.31.5
+kubectl 1.32.11
 
 #asdf:plugin add kubeval
 #renovate: depName=instrumenta/kubeval
@@ -52,7 +56,7 @@ opa 0.68.0
 
 #asdf:plugin add pluto
 #renovate: depName=FairwindsOps/pluto
-pluto 5.16.0
+pluto 5.22.6
 
 #asdf:plugin add tanka
 #renovate: depName=grafana/tanka
