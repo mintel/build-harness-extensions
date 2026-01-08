@@ -1,0 +1,12 @@
+## Kubeconform helpers
+KUBECONFORM_K8S_VERSION?=1.32.11
+KUBECONFORM_IGNORE_FILENAME_PATTERNS?=kustomization.yaml
+KUBECONFORM_ARGS?=-strict -summary -ignore-missing-schemas -skip-failed-schemas
+K8S_RENDERED_DIR?=./rendered/environments
+
+.PHONY: k8s/kubeconform/validate
+
+## Validate manifests with kubeconform
+k8s/kubeconform/validate: satoshi/check-deps
+	find $(K8S_RENDERED_DIR) -name '*.yaml' -o -name '*.yml' \
+		| xargs kubeconform $(KUBECONFORM_ARGS) -kubernetes-version $(KUBECONFORM_K8S_VERSION)
