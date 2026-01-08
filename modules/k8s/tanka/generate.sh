@@ -88,40 +88,87 @@ TMP_RENDERED="$(mktemp -d)"
 TANKA_CACHE_DIR="${TANKA_REPO_DIR}/.tanka-cache"
 mkdir -p "$TANKA_CACHE_DIR"
 echo "Rendering manifests to $TMP_RENDERED..."
-tk export "$TMP_RENDERED/" "$TANKA_REPO_DIR/environments" -r -l "$(join_arr , "${SELECTOR[@]}")" --format="$TANKA_EXPORT_FMT" --merge-strategy=fail-on-conflicts -c "$TANKA_CACHE_DIR" -e '.*'
 
-# Filter out GrafanaDashboard CRs from non-monitoring clusters
-# Dashboards should only be deployed to aws.dev.monitoring and aws.logs
-echo "Filtering GrafanaDashboard manifests from non-monitoring clusters..."
-while IFS= read -r -d '' manifest; do
-  # Extract the environment name (e.g., aws.dev, aws.prod) from the path
-  # Path format: $TMP_RENDERED/environments/<app>/<env>/manifests/<file>.yaml
-  env_name=$(echo "$manifest" | sed -E 's|.*/environments/[^/]+/([^/]+)/manifests/.*|\1|')
-  if [[ "$env_name" != "aws.dev.monitoring" && "$env_name" != "aws.logs" ]]; then
-    rm -f "$manifest"
-  fi
-done < <(find "$TMP_RENDERED" -name "*GrafanaDashboard*.yaml" -print0 2>/dev/null)
 function finish {
   rm -rf "$TMP_RENDERED"
 }
 trap finish EXIT
+
+base_selector="$(join_arr , "${SELECTOR[@]}")"
+
+# Function to run tk export with given selector and target flags
+# Args: $1=selector, $2=target_flag (optional), $3=description
+run_tk_export() {
+    local selector="$1"
+    local target_flag="$2"
+    local description="$3"
+
+    local count
+    count=$(tk env list environments --names -l "$selector" 2>/dev/null | wc -l)
+    if [[ "$count" -gt 0 ]]; then
+        echo "Exporting $count environment(s): $description"
+        # shellcheck disable=SC2086
+        tk export "$TMP_RENDERED/" "$TANKA_REPO_DIR/environments" -r \
+            -l "$selector" \
+            --format="$TANKA_EXPORT_FMT" \
+            --merge-strategy=fail-on-conflicts \
+            -c "$TANKA_CACHE_DIR" \
+            -e '.*' \
+            $target_flag
+    fi
+}
+
+# Filter GrafanaDashboard manifests based on the 'grafana-dashboards' label:
+#   - true/yes: Include all manifests (including dashboards)
+#   - false/no: Exclude GrafanaDashboard manifests
+#   - only: Include ONLY GrafanaDashboard manifests
+#   - (missing): Default to excluding dashboards for backward compatibility
+
+# Export environments with grafana-dashboards=true or grafana-dashboards=yes (include all manifests)
+for val in "true" "yes"; do
+    selector="${base_selector:+$base_selector,}grafana-dashboards=$val"
+    run_tk_export "$selector" "" "grafana-dashboards=$val (all manifests)"
+done
+
+# Export environments with grafana-dashboards=only (dashboards only)
+selector="${base_selector:+$base_selector,}grafana-dashboards=only"
+run_tk_export "$selector" '-t GrafanaDashboard/.*' "grafana-dashboards=only"
+
+# Export environments with grafana-dashboards=false or grafana-dashboards=no (exclude dashboards)
+for val in "false" "no"; do
+    selector="${base_selector:+$base_selector,}grafana-dashboards=$val"
+    run_tk_export "$selector" '-t !GrafanaDashboard/.*' "grafana-dashboards=$val (excluding dashboards)"
+done
+
+# Export environments without grafana-dashboards label (default: exclude dashboards)
+# Use !grafana-dashboards selector to match environments where the label does not exist
+selector="${base_selector:+$base_selector,}!grafana-dashboards"
+run_tk_export "$selector" '-t !GrafanaDashboard/.*' "without grafana-dashboards label (excluding dashboards)"
+
 find "$TMP_RENDERED" -name "manifest.json" -delete
 
 # Move the rendered manifests from the tmpdir to the rendered/ directory.
 echo "Moving rendered manifests to rendered/ dir..."
 swap_manifests() {
-  # Create a skelton of the manifests directory
+  # If no manifests were generated, delete the rendered directory
+  if [[ ! -d "$TMP_RENDERED/$1/manifests" ]]; then
+    echo "No manifests generated for $1 (deleting rendered directory)"
+    rm -rf "$TANKA_REPO_DIR/rendered/$1"
+    return
+  fi
+
+  # Create a skeleton of the manifests directory
   mkdir -p "$TANKA_REPO_DIR/rendered/$1"
-	touch "$TANKA_REPO_DIR/rendered/$1/kustomization.yaml"
+  touch "$TANKA_REPO_DIR/rendered/$1/kustomization.yaml"
   # Remove the old manifests from the kustomization.yaml files
   yq eval --inplace 'del(.resources)' "$TANKA_REPO_DIR/rendered/$1/kustomization.yaml"
   # Swap old manifests for new
-	rm -rf "$TANKA_REPO_DIR/rendered/$1/manifests"
+  rm -rf "$TANKA_REPO_DIR/rendered/$1/manifests"
   mv "$TMP_RENDERED/$1/manifests" "$TANKA_REPO_DIR/rendered/$1/manifests"
   # (Re-)populate the kustomization file
   pushd "$TANKA_REPO_DIR/rendered/$1" > /dev/null || exit 1
-	kustomize edit add resource ./manifests/*.yaml
-	popd > /dev/null || exit 1
+  kustomize edit add resource ./manifests/*.yaml
+  popd > /dev/null || exit 1
 }
 for env_name in $(tk env list environments --names -l "$(join_arr , "${SELECTOR[@]}")" 2>/dev/null); do
   swap_manifests "$env_name" &
