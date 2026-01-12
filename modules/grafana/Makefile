@@ -12,16 +12,16 @@ GRAFANA_SYNC_DOCKER_NAME = grafana_sync
 
 # Don't change these, unless you understand how they're used in the scripts below and accept the repurcussions
 CONTAINER_DASHBOARD_DIRECTORY = /app/dashboards
-ifeq ($(shell git remote get-url origin),git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core-cluster-jsonnet.git)
-TMP_CORE_CLUSTER_JSONNET = .
+ifeq ($(shell git remote get-url origin),git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/monitoring-cluster-jsonnet.git)
+TMP_MONITORING_CLUSTER_JSONNET = .
 else
-TMP_CORE_CLUSTER_JSONNET = /tmp/core-cluster-jsonnet
+TMP_MONITORING_CLUSTER_JSONNET = /tmp/monitoring-cluster-jsonnet
 endif
 TMP_GRAFANA_DATASOURCES = /tmp/grafana-datasources.yaml
 
 UID=$(shell id -u)
 
-.PHONY: grafana/develop grafana/develop-oss grafana/cleanup grafana/aws-profile-check grafana/core-cluster-jsonnet grafana/setup-local-grafana-mintel grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
+.PHONY: grafana/develop grafana/develop-oss grafana/cleanup grafana/aws-profile-check grafana/monitoring-cluster-jsonnet grafana/setup-local-grafana-mintel grafana/setup-local-grafana-oss grafana/setup-grafana-syncer
 
 ifeq (${CREATE_GRAFANA_INSTANCE}, true)
 ## Develop grafana dashboards using live datasources. Mintel internal use only.
@@ -48,20 +48,20 @@ grafana/aws-profile-check:
 	@[ "${AWS_PROFILE}" ] || ( echo ">> ERROR: AWS_PROFILE is not set. Please login with \"aws sso login --profile <name>\" and set this variable, or try \"make grafana/develop-oss\" to edit dashboards with no datasources defined."; exit 1 )
 	@echo "AWS_PROFILE=${AWS_PROFILE}"
 
-grafana/core-cluster-jsonnet:
-	@if [ ! -d "$(TMP_CORE_CLUSTER_JSONNET)" ]; then \
-		git clone git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core-cluster-jsonnet.git --depth 1 -b ${CORE_CLUSTER_JSONNET_BRANCH} ${TMP_CORE_CLUSTER_JSONNET}; \
+grafana/monitoring-cluster-jsonnet:
+	@if [ ! -d "$(TMP_MONITORING_CLUSTER_JSONNET)" ]; then \
+		git clone git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/monitoring-cluster-jsonnet.git --depth 1 -b ${CORE_CLUSTER_JSONNET_BRANCH} ${TMP_MONITORING_CLUSTER_JSONNET}; \
 	fi
-ifeq ($(TMP_CORE_CLUSTER_JSONNET),.)
-	# You are developing in core-cluster-jsonnet; using local grafana-operator manifests to set up Grafana datasources.
+ifeq ($(TMP_MONITORING_CLUSTER_JSONNET),.)
+	# You are developing in monitoring-cluster-jsonnet; using local grafana-operator manifests to set up Grafana datasources.
 else
-	@git -C "$(TMP_CORE_CLUSTER_JSONNET)" pull
+	@git -C "$(TMP_MONITORING_CLUSTER_JSONNET)" pull
 endif
 
-grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/core-cluster-jsonnet
+grafana/setup-local-grafana-mintel: grafana/aws-profile-check grafana/monitoring-cluster-jsonnet
 	@docker pull $(GRAFANA_IMAGE)
-	@mkdir -p ${TMP_CORE_CLUSTER_JSONNET}/provisioning/datasources
-	@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/patch_datasources.sh "${TMP_CORE_CLUSTER_JSONNET}" > ${TMP_GRAFANA_DATASOURCES}
+	@mkdir -p ${TMP_MONITORING_CLUSTER_JSONNET}/provisioning/datasources
+	@${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/patch_datasources.sh "${TMP_MONITORING_CLUSTER_JSONNET}" > ${TMP_GRAFANA_DATASOURCES}
 	@. ${BUILD_HARNESS_EXTENSIONS_PATH}/modules/grafana/scripts/datasource_credentials.sh && \
 		MINTEL_BASE_URL='$(MINTEL_BASE_URL)' \
 		docker run \
