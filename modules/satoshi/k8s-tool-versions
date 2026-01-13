@@ -7,7 +7,7 @@ amtool 0.25.0
 
 #asdf:plugin add conftest
 #renovate: depName=open-policy-agent/conftest
-conftest 0.55.0
+conftest 0.66.0
 
 #asdf:plugin add go-jsonnet https://github.com/sirikon/asdf-go-jsonnet.git
 #renovate: depName=google/go-jsonnet
