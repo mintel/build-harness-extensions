@@ -28,4 +28,4 @@ awscli 2.15.38
 # TODO: remove me; tfsec is deprecated; replace with trivy
 #asdf:plugin add tfsec
 #renovate: depName=aquasecurity/tfsec
-tfsec 1.28.5
+tfsec 1.28.14
