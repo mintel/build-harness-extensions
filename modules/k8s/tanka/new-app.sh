@@ -69,7 +69,7 @@ fi
 # shellcheck disable=SC2086
 mkdir -p lib/${COMPONENT_NAME}
 # shellcheck disable=SC2086
-mkdir -p environments/${COMPONENT_NAME}/{local,aws.dev,aws.qa,aws.prod}
+mkdir -p environments/${COMPONENT_NAME}/{local,aws.dev,aws.dev.monitoring,aws.qa,aws.prod,aws.logs}
 
 
 echo "local m = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-jsonnet/utils/main.libsonnet';
@@ -110,12 +110,27 @@ echo "local m = import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/libs-js
     m.wrappers.helmApp('../../charts/standard-application-stack', $.appValues, $._config),
 }" > "lib/${COMPONENT_NAME}/base.libsonnet"
 
-environments=("local" "aws.dev" "aws.qa" "aws.prod")
+environments=("local" "aws.dev" "aws.dev.monitoring" "aws.qa" "aws.prod" "aws.logs")
 for ENV in "${environments[@]}"
 do
   API_SERVER=""
   if [ "$ENV" == "local" ]; then
     API_SERVER="\n    apiServer: 'https://0.0.0.0:6443',"
+  fi
+
+  # Determine grafana-dashboards label value
+  # Monitoring environments get 'only', standard environments get 'false'
+  if [ "$ENV" == "aws.dev.monitoring" ] || [ "$ENV" == "aws.logs" ]; then
+    GRAFANA_DASHBOARDS="only"
+  else
+    GRAFANA_DASHBOARDS="false"
+  fi
+
+  # Map environment to cluster-env-jsonnet file
+  # aws.dev.monitoring uses aws.dev.libsonnet (no aws.dev.monitoring.libsonnet exists)
+  CLUSTER_ENV_FILE="$ENV"
+  if [ "$ENV" == "aws.dev.monitoring" ]; then
+    CLUSTER_ENV_FILE="aws.dev"
   fi
 
   echo -e "{
@@ -126,13 +141,14 @@ do
     labels: {
       app: '${COMPONENT_NAME}',
       env: '${ENV}',
+      'grafana-dashboards': '${GRAFANA_DASHBOARDS}',
     },
   },
   spec: {
     namespace: $.data._config.namespace,${API_SERVER}
   },
   data:
-    (import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/cluster-env-jsonnet/${ENV}.libsonnet') +
+    (import 'gitlab.com/mintel/satoshi/kubernetes/jsonnet/sre/cluster-env-jsonnet/${CLUSTER_ENV_FILE}.libsonnet') +
     (import '${COMPONENT_NAME}/base.libsonnet') +
     {
       appValues+:: {

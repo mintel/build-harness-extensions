@@ -1,7 +1,7 @@
 ## Tanka helpers
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: tanka/fmt tanka/fmt-test tanka/generate
+.PHONY: tanka/fmt tanka/fmt-test tanka/lint tanka/generate
 
 ## Format Jsonnet files with tanka
 tanka/fmt: satoshi/check-deps
@@ -14,3 +14,7 @@ tanka/fmt-test: satoshi/check-deps
 ## Generate manifests using tanka
 tanka/generate: satoshi/check-deps
 	make k8s/tanka/generate
+
+## Lint Jsonnet files with tanka
+tanka/lint: satoshi/check-deps
+	make k8s/tanka/lint
