@@ -23,7 +23,7 @@ tflint 0.50.3
 terraform-docs 0.17.0
 
 #asdf:plugin add awscli
-awscli 2.15.38
+awscli 2.33.12
 
 # TODO: remove me; tfsec is deprecated; replace with trivy
 #asdf:plugin add tfsec
