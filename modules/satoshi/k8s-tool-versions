@@ -68,4 +68,4 @@ yamllint 1.29.0
 
 #asdf:plugin add yq
 #renovate: depName=mikefarah/yq
-yq 4.31.2
+yq 4.52.2
