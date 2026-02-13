@@ -34,7 +34,7 @@ kubeconform 0.6.4
 
 #asdf:plugin add kubectl
 #renovate: depName=kubernetes/kubernetes
-kubectl 1.32.11
+kubectl 1.33.8
 
 #asdf:plugin add kubeval
 #renovate: depName=instrumenta/kubeval
