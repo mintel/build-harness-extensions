@@ -11,7 +11,7 @@ asdf/install:
 	if [ "$$CURRENT_VER" != "$(ASDF_VERSION)" ]; then \
 		echo "Upgrading asdf from $$CURRENT_VER to $(ASDF_VERSION)..."; \
 		rm -f $(ASDF_BIN_DIR)/asdf; \
-		rm -rf $${HOME}/.asdf; \
+		chmod -R u+w $${HOME}/.asdf 2>/dev/null; rm -rf $${HOME}/.asdf; \
 		mkdir -p $(ASDF_BIN_DIR); \
 		curl -fsSL "https://github.com/asdf-vm/asdf/releases/download/v$(ASDF_VERSION)/asdf-v$(ASDF_VERSION)-linux-amd64.tar.gz" \
 			| tar -xz -C $(ASDF_BIN_DIR); \
