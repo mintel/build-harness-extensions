@@ -23,6 +23,7 @@ asdf/install:
 	@export PATH="$(ASDF_BIN_DIR):$$PATH"; \
 	grep -E "^#asdf:" '${ASDF_REPO_DIR}/.tool-versions' | cut -d':' -f2- | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c 'asdf cmd' || true; \
 	asdf install
-	@echo "Ensure $(ASDF_BIN_DIR) is on your PATH. For example, add to your shell profile:"
-	@echo '  export PATH="$$HOME/.local/bin:$$PATH"'
+	@echo "Ensure $(ASDF_BIN_DIR) and the asdf shims directory are on your PATH."
+	@echo "Add the following to your shell profile:"
+	@echo '  export PATH="$$HOME/.asdf/shims:$$HOME/.local/bin:$$PATH"'
 	@echo "Or see https://asdf-vm.com/guide/getting-started.html for details"
