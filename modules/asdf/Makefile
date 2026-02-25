@@ -1,5 +1,5 @@
 ## asdf helpers
-ASDF_VERSION := 0.16.7
+ASDF_VERSION := 0.18.0
 ASDF_BIN_DIR := ${HOME}/.local/bin
 ASDF_REPO_DIR=$(shell pwd)
 
