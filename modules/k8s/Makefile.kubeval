@@ -1,11 +1,6 @@
-## Kubeval helpers
-KUBEVAL_K8S_VERSION?=1.33.8
-KUBEVAL_IGNORE_FILENAME_PATTERNS?=kustomization.yaml
-KUBEVAL_ARGS?=--strict --quiet --output tap --ignore-missing-schemas --ignored-filename-patterns $(KUBEVAL_IGNORE_FILENAME_PATTERNS)
-K8S_RENDERED_DIR?=./rendered/environments
+## Kubeval helpers (deprecated — use k8s/kubeconform/validate instead)
 
 .PHONY: k8s/kubeval/validate
 
-## Validate manifests
-k8s/kubeval/validate: satoshi/check-deps
-	kubeval $(KUBEVAL_ARGS) --kubernetes-version $(KUBEVAL_K8S_VERSION) -d $(K8S_RENDERED_DIR)
+## Validate manifests (deprecated — use k8s/kubeconform/validate)
+k8s/kubeval/validate: k8s/kubeconform/validate
