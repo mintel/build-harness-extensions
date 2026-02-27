@@ -1,14 +1,27 @@
-## asdf helpers
-ASDF_ROOT := ${HOME}/.asdf
-ASDF_REPO_DIR=$(shell pwd)
+## mise helpers (replaces asdf)
+MISE_VERSION := v2026.2.20
+MISE_BIN := $(shell command -v mise 2>/dev/null || echo $(HOME)/.local/bin/mise)
+MISE_REPO_DIR=$(shell pwd)
+export PATH := $(HOME)/.local/share/mise/shims:$(PATH)
 
-.PHONY: asdf/install
+.PHONY: mise/install
 
-## Installing required tools
-asdf/install:
-	test -s $(ASDF_ROOT) || git clone https://github.com/asdf-vm/asdf.git $(ASDF_ROOT) && source $(ASDF_ROOT)/asdf.sh ;\
-	grep -E "^#asdf:" '${ASDF_REPO_DIR}/.tool-versions' | cut -d':' -f2- | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c 'asdf cmd' || true;\
-	asdf install
-	echo "Profile changes are required. Add the following to your .bashrc:"
-	echo -e "if [ -e $HOME/.asdf ]; then\n    . $HOME/.asdf/asdf.sh\n    . $HOME/.asdf/completions/asdf.bash\nfi"
-	echo "Or see https://asdf-vm.com/guide/getting-started.html#_3-install-asdf for details"
+## Installing mise and required tools
+mise/install:
+	@if ! command -v mise &>/dev/null; then \
+		echo "Installing mise..."; \
+		curl https://mise.run | MISE_VERSION=$(MISE_VERSION) sh; \
+	fi
+	@$(MISE_BIN) plugins install --yes 2>/dev/null || true; \
+	grep -E "^#asdf:" '${MISE_REPO_DIR}/.tool-versions' | cut -d':' -f2- | sed 's/plugin add/plugins install/' | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c '$(MISE_BIN) cmd' || true; \
+	$(MISE_BIN) install --yes
+	@echo ""
+	@echo "Add the following to your shell profile:"
+	@echo '  eval "$$(~/.local/bin/mise activate zsh)"'
+	@echo "Or for bash:"
+	@echo '  eval "$$(~/.local/bin/mise activate bash)"'
+	@echo ""
+	@echo "See https://mise.jdx.dev/getting-started.html for details"
+
+## Legacy alias for backwards compatibility
+asdf/install: mise/install
