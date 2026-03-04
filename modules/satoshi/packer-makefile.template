@@ -1,7 +1,7 @@
 #
 # DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile/packer'
 #
-export HELP_FILTER ?= mise|opa|packer|satoshi|updater
+export HELP_FILTER ?= asdf|opa|packer|satoshi|updater
 -include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
 export BUILD_HARNESS_PATH ?= $(shell 'pwd')
 export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-extensions
@@ -20,6 +20,6 @@ install:
 	@if [ ! -f .tool-versions ]; then \
 		make satoshi/update-tools/packer; \
 	else \
-		make mise/install; \
+		make asdf/install; \
 	fi
 	exit 0

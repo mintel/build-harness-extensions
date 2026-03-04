@@ -15,7 +15,6 @@ mise/install:
 	@$(MISE_BIN) plugins install --yes 2>/dev/null || true; \
 	grep -E "^#asdf:" '${MISE_REPO_DIR}/.tool-versions' | cut -d':' -f2- | sed 's/plugin add/plugins install/' | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c '$(MISE_BIN) cmd' || true; \
 	$(MISE_BIN) install --yes
-	@$(MISE_BIN) reshim
 	@echo ""
 	@echo "Add the following to your shell profile:"
 	@echo '  eval "$$(~/.local/bin/mise activate zsh)"'
