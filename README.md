@@ -54,7 +54,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   k8s/cluster/up                      Starts an existing local Kubernetes cluster
   k8s/create-ns                       Creates required namespaces for the repo in the cluster
   k8s/kubecfg/validate                Validate manifests
-  k8s/kubeval/validate                Validate manifests
+  k8s/kubeconform/validate            Validate manifests
   k8s/tanka/apply/%                   Apply rendered manifests of an app to the local cluster
   k8s/tanka/delete/%                  Removes rendered manifests of an app from the local cluster
   k8s/tanka/diff                      Diff Tanka files against expected golden
