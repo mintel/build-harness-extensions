@@ -15,10 +15,3 @@ mise/install:
 	@$(MISE_BIN) plugins install -q --yes 2>/dev/null || true; \
 	grep -E "^#asdf:" '${MISE_REPO_DIR}/.tool-versions' | cut -d':' -f2- | sed 's/plugin add/plugins install/' | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c '$(MISE_BIN) -q cmd' || true; \
 	$(MISE_BIN) install -q --yes
-	@echo ""
-	@echo "Add the following to your shell profile:"
-	@echo '  eval "$$(~/.local/bin/mise activate zsh)"'
-	@echo "Or for bash:"
-	@echo '  eval "$$(~/.local/bin/mise activate bash)"'
-	@echo ""
-	@echo "See https://mise.jdx.dev/getting-started.html for details"
