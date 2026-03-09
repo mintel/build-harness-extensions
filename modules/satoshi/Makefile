@@ -12,12 +12,19 @@ REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk
 ifndef CI
 ## Check dependencies for Satoshi
 satoshi/check-deps: satoshi/check-mise-dep
-	$(foreach bin,$(REQUIRED_SATOSHI_BINS),\
-		$(if $(shell command -v $(bin) 2> /dev/null),,$(error $(S_RED)[satoshi/check-deps] Please install `$(bin)` using `make mise/install`$(S_RST))))
+	@for bin in $(REQUIRED_SATOSHI_BINS); do \
+		if ! command -v $$bin &> /dev/null; then \
+			echo "$(S_RED)[satoshi/check-deps] Please install \`$$bin\` using \`make mise/install\`$(S_RST)" >&2; \
+			exit 1; \
+		fi; \
+	done
 
 ## Check dependencies (installer) for Satoshi
 satoshi/check-mise-dep:
-	$(if $(shell command -v mise 2> /dev/null),,$(error $(S_RED)[satoshi/check-mise-dep] Please install `mise` (https://mise.jdx.dev)$(S_RST)))
+	@if ! command -v mise &> /dev/null; then \
+		echo "$(S_RED)[satoshi/check-mise-dep] Please install \`mise\` (https://mise.jdx.dev)$(S_RST)" >&2; \
+		exit 1; \
+	fi
 endif
 
 ## Update Satoshi Makefile for k8s toolset
