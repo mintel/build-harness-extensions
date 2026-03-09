@@ -2,6 +2,10 @@
 MISE_VERSION := v2026.2.20
 MISE_BIN := $(shell command -v mise 2>/dev/null || echo $(HOME)/.local/bin/mise)
 MISE_REPO_DIR=$(shell pwd)
+ifndef CI
+$(if $(filter mise/install,$(MAKECMDGOALS)),,$(if $(shell command -v mise 2>/dev/null),,$(warning mise is not installed. See https://mise.jdx.dev)))
+$(if $(filter mise/install,$(MAKECMDGOALS)),,$(if $(MISE_SHELL),,$(warning mise activate is not configured in your shell. Add to your shell profile: eval "$$(mise activate zsh)" or eval "$$(mise activate bash)")))
+endif
 export PATH := $(shell $(MISE_BIN) env --shell bash 2>/dev/null | grep '^export PATH' | cut -d= -f2- | tr -d "'"):$(PATH)
 
 .PHONY: mise/install
