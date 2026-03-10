@@ -36,10 +36,6 @@ kubeconform 0.6.4
 #renovate: depName=kubernetes/kubernetes
 kubectl 1.33.8
 
-#asdf:plugin add kubeval
-#renovate: depName=instrumenta/kubeval
-kubeval v0.16.1
-
 #asdf:plugin add kustomize
 kustomize 5.0.1
 

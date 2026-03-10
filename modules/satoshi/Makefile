@@ -36,5 +36,6 @@ satoshi/update-tools:
 satoshi/update-tools/%: FORCE
 	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-tool-versions")
 	@make asdf/install
+	@make mise/install
 
 FORCE:
