@@ -47,6 +47,6 @@ satoshi/update-tools/%: FORCE
 ## Update Satoshi asdf .tool-versions for k8s toolset and install with asdf
 satoshi/tools/install: FORCE
 	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/k8s-tool-versions")
-	@make asdf/install
+	@make mise/install
 
 FORCE:
