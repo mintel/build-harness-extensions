@@ -13,7 +13,7 @@
   },
   regexManagers: [
     {
-      description: "Update tools in asdf-vm tool-versions",
+      description: "Update tools in .tool-versions",
       fileMatch: [
         ".*tool-versions$",
       ],

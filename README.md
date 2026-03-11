@@ -22,7 +22,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   alembic/current                     Display the current revision of alembic migrations
   alembic/history                     List changeset scripts in chronological order
   alembic/upgrade                     Apply alembic migrations to the latest revision
-  asdf/install                        Installing required tools
+  mise/install                        Installing mise and required tools
   dbt/clean                           Clean up dbt logs and compiled code
   dbt/compile                         Compile dbt code for future use
   dbt/docs                            Generate documentation for your dbt project
@@ -54,7 +54,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   k8s/cluster/up                      Starts an existing local Kubernetes cluster
   k8s/create-ns                       Creates required namespaces for the repo in the cluster
   k8s/kubecfg/validate                Validate manifests
-  k8s/kubeval/validate                Validate manifests
+  k8s/kubeconform/validate            Validate manifests
   k8s/tanka/apply/%                   Apply rendered manifests of an app to the local cluster
   k8s/tanka/delete/%                  Removes rendered manifests of an app from the local cluster
   k8s/tanka/diff                      Diff Tanka files against expected golden
@@ -67,12 +67,12 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   k8s/tanka/test                      Run Tanka tests
   opa/clone-policy                    Git clone policies (requires OPA_POLICY_REPO argument)
   opa/conftest                        Validate manifests
-  satoshi/check-asdf-dep              Check dependencies (installer) for Satoshi
+  satoshi/check-mise-dep              Check dependencies (installer) for Satoshi
   satoshi/check-deps                  Check dependencies for Satoshi
   satoshi/update-makefile             Update Satoshi Makefile for k8s toolset
   satoshi/update-makefile/%           Update Satoshi Makefile for a particular toolset e.g. k8s and tf
-  satoshi/update-tools                Update Satoshi asdf .tool-versions for k8s related repo
-  satoshi/update-tools/%              Update Satoshi asdf .tool-versions for a particular toolset e.g. k8s and tf
+  satoshi/update-tools                Update Satoshi .tool-versions for k8s related repo
+  satoshi/update-tools/%              Update Satoshi .tool-versions for a particular toolset e.g. k8s and tf
   sentinel/pull-hashicorp-functions   Install Hashicorp sentinel helper functions
   updater/test                        Dry run for testing argocd-image-updater annotations
   pipenv/lock                         Lock Pipenv dependencies
