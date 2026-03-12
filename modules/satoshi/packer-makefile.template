@@ -1,5 +1,5 @@
 #
-# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile/packer'
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/makefile/update/packer'
 #
 export HELP_FILTER ?= asdf|opa|packer|satoshi|updater
 -include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
