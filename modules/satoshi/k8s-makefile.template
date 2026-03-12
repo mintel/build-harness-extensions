@@ -1,5 +1,5 @@
 #
-# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile'
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/makefile/update/k8s'
 #
 export HELP_FILTER ?= mise|grafana|jsonnet|k8s|kyverno|opa|pluto|satoshi|updater
 -include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
@@ -17,10 +17,6 @@ bootstrap:
 ## Install tools and initial jsonnet-deps
 .PHONY: install
 install:
-	@if [ ! -f .tool-versions ]; then \
-		make satoshi/update-tools/k8s; \
-	else \
-		make mise/install; \
-	fi
+	make satoshi/tools/update/k8s
+	make satoshi/tools/install
 	make jsonnet/install
-	exit 0

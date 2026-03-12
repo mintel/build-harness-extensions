@@ -6,7 +6,8 @@ S_BLD := $(shell tput bold 2> /dev/null || true)
 
 REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq mimirtool
 
-.PHONY: satoshi/check-deps satoshi/check-mise-dep satoshi/update-makefile satoshi/update-tools
+.PHONY: satoshi/check-deps satoshi/check-mise-dep \
+       satoshi/update-makefile satoshi/update-tools
 
 # Skip checks if running in CI for now (binaries not installed by mise)
 ifndef CI
@@ -27,26 +28,36 @@ satoshi/check-mise-dep:
 	fi
 endif
 
-## Update Satoshi Makefile for k8s toolset
-satoshi/update-makefile:
-	@make satoshi/update-makefile/k8s
-
 ## Update Satoshi Makefile for a particular toolset e.g. k8s and tf
-satoshi/update-makefile/%: FORCE
+satoshi/makefile/update/%: FORCE
 	$(shell curl -sSL -o Makefile "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-makefile.template")
 
-## Update Satoshi .tool-versions for k8s toolset
-satoshi/update-tools:
-	@make satoshi/update-tools/k8s
-
 ## Update Satoshi .tool-versions for a particular toolset e.g. k8s and tf
-satoshi/update-tools/%: FORCE
+satoshi/tools/update/%: FORCE
 	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-tool-versions")
-	@make mise/install
 
-## Update Satoshi asdf .tool-versions for k8s toolset and install with asdf
+## Update Satoshi mise.tool-versions for k8s toolset and install with mise
 satoshi/tools/install: FORCE
-	$(shell curl -sSL -o .tool-versions "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/k8s-tool-versions")
-	@make mise/install
+	@$(MAKE) mise/install
+
+## DEPRECATED: Use satoshi/makefile/update/k8s instead
+satoshi/update-makefile:
+	@echo "$(S_YLW)$(S_BLD)[DEPRECATED] satoshi/update-makefile is deprecated, use satoshi/makefile/update/k8s instead$(S_RST)" >&2
+	@$(MAKE) satoshi/makefile/update/k8s
+
+## DEPRECATED: Use satoshi/makefile/update/<toolset> instead
+satoshi/update-makefile/%: FORCE
+	@echo "$(S_YLW)$(S_BLD)[DEPRECATED] satoshi/update-makefile/$* is deprecated, use satoshi/makefile/update/$* instead$(S_RST)" >&2
+	@$(MAKE) satoshi/makefile/update/$*
+
+## DEPRECATED: Use satoshi/tools/update/k8s instead
+satoshi/update-tools:
+	@echo "$(S_YLW)$(S_BLD)[DEPRECATED] satoshi/update-tools is deprecated, use satoshi/tools/update/k8s instead$(S_RST)" >&2
+	@$(MAKE) satoshi/tools/update/k8s
+
+## DEPRECATED: Use satoshi/tools/update/<toolset> instead
+satoshi/update-tools/%: FORCE
+	@echo "$(S_YLW)$(S_BLD)[DEPRECATED] satoshi/update-tools/$* is deprecated, use satoshi/tools/update/$* instead$(S_RST)" >&2
+	@$(MAKE) satoshi/tools/update/$*
 
 FORCE:

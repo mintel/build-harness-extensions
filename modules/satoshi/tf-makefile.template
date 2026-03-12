@@ -1,5 +1,5 @@
 #
-# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/update-makefile/tf'
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/makefile/update/tf'
 #
 export HELP_FILTER ?= mise|satoshi
 -include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
@@ -19,5 +19,5 @@ bootstrap:
 ## Install tools
 .PHONY: install
 install:
-	make mise/install
+	make satoshi/tools/install
 	exit 0
