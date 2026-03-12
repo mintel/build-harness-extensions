@@ -17,10 +17,7 @@ bootstrap:
 ## Install tools and initial jsonnet-deps
 .PHONY: install
 install:
-	@if [ ! -f .tool-versions ]; then \
-		make satoshi/update-tools/k8s; \
-	else \
-		make mise/install; \
-	fi
-	make jsonnet/install
-	exit 0
+      make satoshi/update-tools/k8s; \
+      make satoshi/tools/install
+      make jsonnet/install
+      exit 0

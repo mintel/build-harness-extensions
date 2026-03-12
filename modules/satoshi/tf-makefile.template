@@ -19,5 +19,5 @@ bootstrap:
 ## Install tools
 .PHONY: install
 install:
-	make mise/install
+	make satoshi/tools/install
 	exit 0
