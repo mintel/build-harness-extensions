@@ -16,6 +16,6 @@ mise/install:
 		echo "Installing mise..."; \
 		curl https://mise.run | MISE_VERSION=$(MISE_VERSION) sh; \
 	fi
-	@$(MISE_BIN) plugins install -q --yes 2>/dev/null || true; \
-	grep -E "^#asdf:" '${MISE_REPO_DIR}/.tool-versions' | cut -d':' -f2- | sed 's/plugin add/plugins install/' | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c '$(MISE_BIN) -q cmd' || true; \
+	@$(MISE_BIN) plugins install --verbose --yes 2>/dev/null || true; \
+	grep -E "^#asdf:" '${MISE_REPO_DIR}/.tool-versions' | cut -d':' -f2- | sed 's/plugin add/plugins install/' | tr '\n' '\0' | xargs -0 -n1 -Icmd -- sh -c '$(MISE_BIN) --verbose cmd' || true; \
 	$(MISE_BIN) install -q --yes
