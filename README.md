@@ -41,6 +41,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
   grafana/cleanup                     Cleanup docker containers and files associated with grafana/develop
   grafana/develop                     Develop grafana dashboards using live datasources. Mintel internal use only.
   grafana/develop-oss                 Develop grafana dashboards without setting up datasources.
+  grafana/setup-grafana-mcp           Run grafana/mcp-grafana as a sidecar so LLM agents can drive the local Grafana instance.
   jsonnet/diff                        Diff Jsonnet fils against expected golden
   jsonnet/diff-help                   Help regarding Jsonnet diff
   jsonnet/gen-golden                  Generate expected golden files from Jsonnet
