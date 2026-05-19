@@ -4,4 +4,6 @@
 gomplate/render:
 	@if [ -f .gomplate.yaml ]; then \
 		gomplate --config .gomplate.yaml; \
+	else \
+		echo "[gomplate/render] no .gomplate.yaml found; skipping"; \
 	fi
