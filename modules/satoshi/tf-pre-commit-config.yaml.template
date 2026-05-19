@@ -12,6 +12,15 @@ repos:
         args: ['--allow-multiple-documents']
       - id: check-symlinks
 
+  - repo: local
+    hooks:
+      - id: gomplate-render
+        name: gomplate render
+        entry: make gomplate/render
+        language: system
+        pass_filenames: false
+        files: '(\.tf\.tmpl|\.gomplate\.yaml)$'
+
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.105.0
     hooks:
@@ -26,13 +35,3 @@ repos:
       # NOTE: tfsec is deprecated upstream (replaced by terraform_trivy);
       # tracked for removal alongside the tfsec entry in tf-tool-versions.
       - id: terraform_tfsec
-
-  # Uncomment in repos that render *.tf.tmpl via `make render` (gomplate):
-  # - repo: local
-  #   hooks:
-  #     - id: render
-  #       name: Render Templates
-  #       language: system
-  #       entry: make -B render
-  #       pass_filenames: false
-  #       files: '(\.tf(\.tmpl)?|\.gomplate\.yaml)$'
