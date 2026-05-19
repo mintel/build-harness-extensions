@@ -1,0 +1,38 @@
+---
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/pre-commit/update/tf'.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      - id: check-symlinks
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_docs
+        args:
+          - --args=--config=.terraform-docs.yml
+      - id: terraform_tflint
+      - id: terraform_validate
+        args:
+          - --hook-config=--retry-once-with-cleanup=true
+      # NOTE: tfsec is deprecated upstream (replaced by terraform_trivy);
+      # tracked for removal alongside the tfsec entry in tf-tool-versions.
+      - id: terraform_tfsec
+
+  # Uncomment in repos that render *.tf.tmpl via `make render` (gomplate):
+  # - repo: local
+  #   hooks:
+  #     - id: render
+  #       name: Render Templates
+  #       language: system
+  #       entry: make -B render
+  #       pass_filenames: false
+  #       files: '(\.tf(\.tmpl)?|\.gomplate\.yaml)$'

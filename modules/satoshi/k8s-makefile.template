@@ -20,3 +20,4 @@ install:
 	make satoshi/tools/update/k8s
 	make satoshi/tools/install
 	make jsonnet/install
+	make satoshi/pre-commit/install

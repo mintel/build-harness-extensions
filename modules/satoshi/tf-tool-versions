@@ -29,3 +29,7 @@ awscli 2.34.45
 #asdf:plugin add tfsec
 #renovate: depName=aquasecurity/tfsec
 tfsec 1.28.14
+
+#asdf:plugin add pre-commit
+#renovate: depName=pre-commit/pre-commit
+pre-commit 4.6.0
