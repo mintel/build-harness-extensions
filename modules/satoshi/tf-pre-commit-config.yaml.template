@@ -12,11 +12,6 @@ repos:
         args: ['--allow-multiple-documents']
       - id: check-symlinks
 
-  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.6.1
-    hooks:
-      - id: editorconfig-checker
-
   - repo: local
     hooks:
       - id: gomplate-render

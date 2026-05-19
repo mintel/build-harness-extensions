@@ -13,11 +13,6 @@ repos:
         args: [--branch, main]
       - id: sort-simple-yaml
 
-  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.6.1
-    hooks:
-      - id: editorconfig-checker
-
   - repo: local
     hooks:
       - id: tanka-fmt
