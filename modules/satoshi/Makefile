@@ -49,6 +49,18 @@ satoshi/pre-commit/update/%: FORCE
 satoshi/pre-commit/install: FORCE
 	@pre-commit install || echo "$(S_YLW)[satoshi/pre-commit/install] pre-commit install failed (continuing)$(S_RST)" >&2
 
+## Update Satoshi .editorconfig for a particular toolset e.g. k8s and tf
+satoshi/editorconfig/update/%: FORCE
+	$(shell curl -sSL -o .editorconfig "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-editorconfig.template")
+
+## Update Satoshi .terraform-docs.yml for a particular toolset (tf only)
+satoshi/terraform-docs/update/%: FORCE
+	$(shell curl -sSL -o .terraform-docs.yml "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-terraform-docs.yml.template")
+
+## Update Satoshi .tflint.hcl for a particular toolset (tf only)
+satoshi/tflint/update/%: FORCE
+	$(shell curl -sSL -o .tflint.hcl "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-tflint.hcl.template")
+
 ## DEPRECATED: Use satoshi/makefile/update/k8s instead
 satoshi/update-makefile:
 	@echo "$(S_YLW)$(S_BLD)[DEPRECATED] satoshi/update-makefile is deprecated, use satoshi/makefile/update/k8s instead$(S_RST)" >&2
