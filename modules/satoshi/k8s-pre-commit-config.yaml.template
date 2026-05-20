@@ -1,0 +1,23 @@
+---
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/pre-commit/update/k8s'.
+exclude: ^(charts|vendor|rendered)/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: end-of-file-fixer
+        exclude: (.*dashboards/)
+      - id: no-commit-to-branch
+        args: [--branch, main]
+      - id: sort-simple-yaml
+
+  - repo: local
+    hooks:
+      - id: tanka-fmt
+        name: tanka fmt
+        entry: make k8s/tanka/fmt
+        language: system
+        pass_filenames: false
+        files: \.(libsonnet|jsonnet)$

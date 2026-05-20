@@ -65,3 +65,7 @@ yamllint 1.29.0
 #asdf:plugin add yq
 #renovate: depName=mikefarah/yq
 yq 4.31.2
+
+#asdf:plugin add pre-commit
+#renovate: depName=pre-commit/pre-commit
+pre-commit 4.6.0

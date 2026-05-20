@@ -7,7 +7,8 @@ S_BLD := $(shell tput bold 2> /dev/null || true)
 REQUIRED_SATOSHI_BINS := conftest helm jb jsonnet kubectl kustomize opa pluto tk yq mimirtool
 
 .PHONY: satoshi/check-deps satoshi/check-mise-dep \
-       satoshi/update-makefile satoshi/update-tools
+       satoshi/update-makefile satoshi/update-tools \
+       satoshi/pre-commit/install
 
 # Skip checks if running in CI for now (binaries not installed by mise)
 ifndef CI
@@ -39,6 +40,26 @@ satoshi/tools/update/%: FORCE
 ## Update Satoshi mise.tool-versions for k8s toolset and install with mise
 satoshi/tools/install: FORCE
 	@$(MAKE) mise/install
+
+## Update Satoshi .pre-commit-config.yaml for a particular toolset e.g. k8s and tf
+satoshi/pre-commit/update/%: FORCE
+	$(shell curl -sSL -o .pre-commit-config.yaml "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-pre-commit-config.yaml.template")
+
+## Install pre-commit git hook (allows failure; e.g. not a git repo yet)
+satoshi/pre-commit/install: FORCE
+	@pre-commit install || echo "$(S_YLW)[satoshi/pre-commit/install] pre-commit install failed (continuing)$(S_RST)" >&2
+
+## Update Satoshi .editorconfig for a particular toolset e.g. k8s and tf
+satoshi/editorconfig/update/%: FORCE
+	$(shell curl -sSL -o .editorconfig "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-editorconfig.template")
+
+## Update Satoshi .terraform-docs.yml for a particular toolset (tf only)
+satoshi/terraform-docs/update/%: FORCE
+	$(shell curl -sSL -o .terraform-docs.yml "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-terraform-docs.yml.template")
+
+## Update Satoshi .tflint.hcl for a particular toolset (tf only)
+satoshi/tflint/update/%: FORCE
+	$(shell curl -sSL -o .tflint.hcl "https://raw.githubusercontent.com/mintel/build-harness-extensions/main/modules/satoshi/${*}-tflint.hcl.template")
 
 ## DEPRECATED: Use satoshi/makefile/update/k8s instead
 satoshi/update-makefile:

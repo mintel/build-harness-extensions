@@ -20,4 +20,5 @@ bootstrap:
 .PHONY: install
 install:
 	make satoshi/tools/install
+	make satoshi/pre-commit/install
 	exit 0

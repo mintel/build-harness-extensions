@@ -1,0 +1,5 @@
+---
+# DO NOT OVERRIDE THIS FILE. AUTO-GENERATED FROM 'make satoshi/terraform-docs/update/tf'.
+formatter: markdown
+settings:
+  lockfile: false
