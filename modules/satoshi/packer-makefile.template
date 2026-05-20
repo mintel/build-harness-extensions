@@ -10,8 +10,13 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
 .PHONY: bootstrap
 bootstrap:
 	make init
-	if [ ! -d "./build-harness-extensions" ]; then git submodule add https://github.com/mintel/build-harness-extensions.git build-harness-extensions ; fi
-	git submodule update --init --recursive
+	@if [ -d "./build-harness-extensions" ]; then \
+		: ; \
+	elif [ -f .gitmodules ] && git config --file .gitmodules --get submodule.build-harness-extensions.url >/dev/null 2>&1; then \
+		git submodule update --init --recursive build-harness-extensions ; \
+	else \
+		git submodule add https://github.com/mintel/build-harness-extensions.git build-harness-extensions ; \
+	fi
 	exit 0
 
 ## Install tools
