@@ -12,7 +12,7 @@ export BUILD_HARNESS_EXTENSIONS_PATH ?= $(BUILD_HARNESS_PATH)/build-harness-exte
 bootstrap:
 	git init
 	make init
-	@if [ -d "./build-harness-extensions" ]; then \
+	@if [ -e "./build-harness-extensions/.git" ]; then \
 		: ; \
 	elif [ -f .gitmodules ] && git config --file .gitmodules --get submodule.build-harness-extensions.url >/dev/null 2>&1; then \
 		git submodule update --init --recursive build-harness-extensions ; \
