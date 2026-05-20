@@ -29,6 +29,3 @@ repos:
         args:
           - --args=--config=.terraform-docs.yml
       - id: terraform_tflint
-      # NOTE: tfsec is deprecated upstream (replaced by terraform_trivy);
-      # tracked for removal alongside the tfsec entry in tf-tool-versions.
-      - id: terraform_tfsec
