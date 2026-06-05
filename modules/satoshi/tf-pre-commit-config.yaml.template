@@ -29,3 +29,4 @@ repos:
         args:
           - --args=--config=.terraform-docs.yml
       - id: terraform_tflint
+        exclude: '(^|/)\.[^/]+/'
