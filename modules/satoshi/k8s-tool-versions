@@ -44,7 +44,7 @@ kustomize 5.0.1
 kyverno-cli 1.13.4
 
 #asdf:plugin add mimirtool https://github.com/asdf-community/asdf-mimirtool.git
-mimirtool 2.17.2
+mimirtool 2.17.7
 
 #asdf:plugin add opa
 #renovate: depName=open-policy-agent/opa
