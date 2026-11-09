@@ -41,7 +41,7 @@ kustomize 5.0.1
 
 #asdf:plugin add kyverno-cli https://github.com/hobaen/asdf-kyverno-cli.git
 #renovate: depName=kyverno/kyverno
-kyverno-cli 1.13.4
+kyverno-cli 1.19.2
 
 #asdf:plugin add mimirtool https://github.com/asdf-community/asdf-mimirtool.git
 mimirtool 2.17.2
