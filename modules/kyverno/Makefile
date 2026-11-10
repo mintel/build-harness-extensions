@@ -1,11 +1,26 @@
-## OPA (open-policy-agent) helpers
+## Kyverno policy checks against rendered cluster manifests.
 KYVERNO_POLICY_BRANCH ?= main
 KYVERNO_POLICY_DIR = /tmp/kyverno-policy
 KYVERNO_POLICY_SUBDIR ?= rendered/environments/kyverno/aws.prod/manifests
 KYVERNO_POLICY_REPO ?= git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core-cluster-jsonnet.git
+KYVERNO_CEL_TEST_DIR ?= lib/kyverno/tests/cel-cutover
+KYVERNO_CEL_RENDERED ?= rendered/environments/kyverno/aws.dev/manifests
+KYVERNO_CEL_PREPARED ?= $(KYVERNO_CEL_TEST_DIR)/prepared/policies
+KYVERNO_SANITIZE_CLI ?= lib/kyverno/tests/sanitize-for-cli.sh
+# CLI-only merges; never write under rendered/ (see kyverno/combine-policies).
+KYVERNO_COMBINED_DIR ?= $(KYVERNO_POLICY_DIR)/.kyverno-combined
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
-.PHONY: kyverno/check-env kyverno/clone-policy kyverno/test
+.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/test-cel kyverno/combine-policies kyverno/prepare-cel-test
+
+## Print Kyverno CLI version and binary path (requires kyverno on PATH)
+kyverno/print-cli-version:
+	@if ! command -v kyverno >/dev/null 2>&1; then \
+		echo "Kyverno CLI not found in PATH (install via mise: kyverno-cli)" >&2; \
+		exit 1; \
+	fi
+	@ver=$$(kyverno version 2>/dev/null | sed -n 's/^Version: //p' | head -1); \
+	printf '==> Kyverno CLI %s (%s)\n' "$${ver:-unknown}" "$$(command -v kyverno)"
 
 # Check Kyverno environment is suitable
 kyverno/check-env:
@@ -25,19 +40,61 @@ kyverno/clone-policy: kyverno/check-env
 	fi ;\
 	git clone --depth=1 $(KYVERNO_POLICY_REPO) -b $(KYVERNO_POLICY_BRANCH) $(KYVERNO_POLICY_DIR) ;\
 
-## Validate manifests
-kyverno/test: satoshi/check-deps kyverno/clone-policy
-	@errs=0;
-	pushd $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR) ;\
-	yq eval-all *.ClusterPolicy*.yaml > combined-cluster-policies.yaml ;\
-	yq eval --inplace 'del(.metadata.namespace)' combined-cluster-policies.yaml ;\
-	yq eval --inplace 'del(.metadata.labels["app.mintel.com/region"])' combined-cluster-policies.yaml ;\
-	yq eval-all *.PolicyException*.yaml > combined-policy-exceptions.yaml ;\
-	popd ;\
-	for dir in $(MANIFEST_DIRS) ; do \
-		matchedfiles=$$(find $${dir} -type f -name 'apps-v1.Deployment*.yaml' -o -name 'apps-v1.StatefulSet*' -o -name 'apps-v1.DaemonSet*' -o -name 'batch-v1.CronJob*' -o -name 'batch-v1.Job*') ;\
-		if [ ! -z "$${matchedfiles}" ]; then \
-			if ! printf -- '--resource\0%s\0' $$(find $${dir} -type f -name 'apps-v1.Deployment*.yaml' -o -name 'apps-v1.StatefulSet*' -o -name 'apps-v1.DaemonSet*' -o -name 'batch-v1.CronJob*' -o -name 'batch-v1.Job*') | xargs -0 kyverno apply --table $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)/combined-cluster-policies.yaml --exceptions $(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)/combined-policy-exceptions.yaml; then \
+## Merge ClusterPolicy / ValidatingPolicy / PolicyException YAML for kyverno apply
+kyverno/combine-policies:
+	@manifest_dir="$(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)" ;\
+	combined_dir="$(KYVERNO_COMBINED_DIR)" ;\
+	sanitize="$(CURDIR)/$(KYVERNO_SANITIZE_CLI)" ;\
+	set -e ;\
+	mkdir -p "$$combined_dir" ;\
+	rm -f "$$combined_dir"/combined-*.yaml "$$combined_dir"/.kyverno-cli-sanitized-*.yaml ;\
+	cd "$$manifest_dir" ;\
+	if compgen -G '*ClusterPolicy*.yaml' > /dev/null; then \
+		yq eval-all 'del(.metadata.namespace, .metadata.labels["app.mintel.com/region"])' *ClusterPolicy*.yaml \
+			> "$$combined_dir/combined-cluster-policies.yaml" ;\
+	fi ;\
+	if compgen -G 'policies.kyverno.io-*ValidatingPolicy*.yaml' > /dev/null; then \
+		for f in policies.kyverno.io-*ValidatingPolicy*.yaml; do \
+			"$$sanitize" "$$f" > "$$combined_dir/.kyverno-cli-sanitized-$$(basename $$f)"; \
+		done ;\
+		yq eval-all '.' "$$combined_dir"/.kyverno-cli-sanitized-*.yaml \
+			> "$$combined_dir/combined-validating-policies.yaml" ;\
+		rm -f "$$combined_dir"/.kyverno-cli-sanitized-*.yaml ;\
+	fi ;\
+	if compgen -G '*PolicyException*.yaml' > /dev/null; then \
+		yq eval-all '.' *PolicyException*.yaml \
+			> "$$combined_dir/combined-policy-exceptions.yaml" ;\
+	fi
+
+## Validate rendered workloads against kyverno policies (ClusterPolicy and/or ValidatingPolicy)
+kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy kyverno/combine-policies
+	@errs=0; \
+	combined_dir="$(KYVERNO_COMBINED_DIR)" ;\
+	policy_args="" ;\
+	if [ -f "$$combined_dir/combined-cluster-policies.yaml" ]; then \
+		policy_args="$$policy_args $$combined_dir/combined-cluster-policies.yaml" ;\
+	fi ;\
+	if [ -f "$$combined_dir/combined-validating-policies.yaml" ]; then \
+		policy_args="$$policy_args $$combined_dir/combined-validating-policies.yaml" ;\
+	fi ;\
+	if [ -z "$$policy_args" ]; then \
+		echo "No combined ClusterPolicy or ValidatingPolicy manifests for $(KYVERNO_POLICY_SUBDIR)" ;\
+		exit 1 ;\
+	fi ;\
+	exc_arg="" ;\
+	if [ -f "$$combined_dir/combined-policy-exceptions.yaml" ]; then \
+		exc_arg="--exceptions $$combined_dir/combined-policy-exceptions.yaml" ;\
+	fi ;\
+	for dir in $(MANIFEST_DIRS); do \
+		matchedfiles=$$(find $${dir} -type f \( \
+			-name 'apps-v1.Deployment*.yaml' -o \
+			-name 'apps-v1.StatefulSet*' -o \
+			-name 'apps-v1.DaemonSet*' -o \
+			-name 'batch-v1.CronJob*' -o \
+			-name 'batch-v1.Job*' \) 2>/dev/null) ;\
+		if [ -n "$$matchedfiles" ]; then \
+			if ! printf -- '--resource\0%s\0' $$matchedfiles \
+				| xargs -0 kyverno apply --table $$policy_args $$exc_arg; then \
 				errs=$$(( $$errs + 1 )); \
 			fi ;\
 		fi; \
@@ -45,3 +102,27 @@ kyverno/test: satoshi/check-deps kyverno/clone-policy
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		exit 1; \
 	fi
+
+## Copy aws.dev ValidatingPolicies into prepared/ (envsubst CLUSTER_REGION for kyverno CLI)
+kyverno/prepare-cel-test:
+	@test -d $(KYVERNO_CEL_RENDERED) || (echo "rendered aws.dev kyverno missing; run: make k8s/tanka/generate/kyverno" && exit 1)
+	@test -f $(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt || (echo "missing $(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt" && exit 1)
+	@test -x $(KYVERNO_SANITIZE_CLI) || chmod +x $(KYVERNO_SANITIZE_CLI)
+	@mkdir -p $(KYVERNO_CEL_PREPARED)
+	@set -e; \
+	export CLUSTER_REGION=$${CLUSTER_REGION:-eu-west-2}; \
+	while IFS= read -r name || [ -n "$$name" ]; do \
+		case "$$name" in ''|\#*) continue ;; esac; \
+		src="$(KYVERNO_CEL_RENDERED)/policies.kyverno.io-v1beta1.ValidatingPolicy-kyverno-$$name.yaml"; \
+		test -f "$$src" || (echo "missing rendered policy $$src" && exit 1); \
+		"$(KYVERNO_SANITIZE_CLI)" "$$src" > "$(KYVERNO_CEL_PREPARED)/$$name.yaml"; \
+	done < "$(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt"
+
+## Regression tests for aws.dev CEL policies (upstream patches, autogen, exceptions)
+kyverno/test-cel: satoshi/check-deps kyverno/print-cli-version kyverno/prepare-cel-test
+	@test -f $(KYVERNO_CEL_TEST_DIR)/kyverno-test.yaml || (echo "missing $(KYVERNO_CEL_TEST_DIR)" && exit 1)
+	kyverno test $(KYVERNO_CEL_TEST_DIR)
+
+## Workload sweep against aws.dev CEL policies
+kyverno/test-dev-workloads: KYVERNO_POLICY_SUBDIR=rendered/environments/kyverno/aws.dev/manifests
+kyverno/test-dev-workloads: kyverno/test
