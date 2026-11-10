@@ -6,12 +6,15 @@ KYVERNO_POLICY_REPO ?= git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core
 KYVERNO_CEL_TEST_DIR ?= lib/kyverno/tests/cel-cutover
 KYVERNO_CEL_RENDERED ?= rendered/environments/kyverno/aws.dev/manifests
 KYVERNO_CEL_PREPARED ?= $(KYVERNO_CEL_TEST_DIR)/prepared/policies
+KYVERNO_APP_STANDARDS_TEST_DIR ?= lib/kyverno/tests/app-standards
+KYVERNO_APP_STANDARDS_PREPARED ?= $(KYVERNO_APP_STANDARDS_TEST_DIR)/prepared/policies
 KYVERNO_SANITIZE_CLI ?= lib/kyverno/tests/sanitize-for-cli.sh
 # CLI-only merges; never write under rendered/ (see kyverno/combine-policies).
 KYVERNO_COMBINED_DIR ?= $(KYVERNO_POLICY_DIR)/.kyverno-combined
+KYVERNO_APP_STANDARDS_COMBINED ?= $(KYVERNO_POLICY_DIR)/.kyverno-app-standards-combined
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
-.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/test-cel kyverno/combine-policies kyverno/prepare-cel-test
+.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/test-cel kyverno/combine-policies kyverno/prepare-cel-test kyverno/combine-app-standards kyverno/test-app-standards kyverno/prepare-app-standards-test kyverno/test-app-standards-unit
 
 ## Print Kyverno CLI version and binary path (requires kyverno on PATH)
 kyverno/print-cli-version:
@@ -41,6 +44,7 @@ kyverno/clone-policy: kyverno/check-env
 	git clone --depth=1 $(KYVERNO_POLICY_REPO) -b $(KYVERNO_POLICY_BRANCH) $(KYVERNO_POLICY_DIR) ;\
 
 ## Merge ClusterPolicy / ValidatingPolicy / PolicyException YAML for kyverno apply
+## Excludes app-standards ValidatingPolicies (use kyverno/test-app-standards).
 kyverno/combine-policies:
 	@manifest_dir="$(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)" ;\
 	combined_dir="$(KYVERNO_COMBINED_DIR)" ;\
@@ -55,15 +59,73 @@ kyverno/combine-policies:
 	fi ;\
 	if compgen -G 'policies.kyverno.io-*ValidatingPolicy*.yaml' > /dev/null; then \
 		for f in policies.kyverno.io-*ValidatingPolicy*.yaml; do \
+			if yq -e '.metadata.labels["app.mintel.com/policy-set"] == "app-standards"' "$$f" >/dev/null 2>&1; then \
+				continue ;\
+			fi ;\
 			"$$sanitize" "$$f" > "$$combined_dir/.kyverno-cli-sanitized-$$(basename $$f)"; \
 		done ;\
-		yq eval-all '.' "$$combined_dir"/.kyverno-cli-sanitized-*.yaml \
-			> "$$combined_dir/combined-validating-policies.yaml" ;\
+		if compgen -G "$$combined_dir"/.kyverno-cli-sanitized-*.yaml > /dev/null; then \
+			yq eval-all '.' "$$combined_dir"/.kyverno-cli-sanitized-*.yaml \
+				> "$$combined_dir/combined-validating-policies.yaml" ;\
+		fi ;\
 		rm -f "$$combined_dir"/.kyverno-cli-sanitized-*.yaml ;\
 	fi ;\
 	if compgen -G '*PolicyException*.yaml' > /dev/null; then \
 		yq eval-all '.' *PolicyException*.yaml \
 			> "$$combined_dir/combined-policy-exceptions.yaml" ;\
+	fi
+
+## Combine only app-standards ValidatingPolicies and force Deny for CLI apply
+kyverno/combine-app-standards:
+	@manifest_dir="$(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)" ;\
+	combined_dir="$(KYVERNO_APP_STANDARDS_COMBINED)" ;\
+	sanitize="$(CURDIR)/$(KYVERNO_SANITIZE_CLI)" ;\
+	set -e ;\
+	mkdir -p "$$combined_dir" ;\
+	rm -f "$$combined_dir"/combined-*.yaml "$$combined_dir"/.kyverno-cli-sanitized-*.yaml ;\
+	cd "$$manifest_dir" ;\
+	if ! compgen -G 'policies.kyverno.io-*ValidatingPolicy*.yaml' > /dev/null; then \
+		echo "No ValidatingPolicy manifests in $(KYVERNO_POLICY_SUBDIR)" ;\
+		exit 1 ;\
+	fi ;\
+	found=0 ;\
+	for f in policies.kyverno.io-*ValidatingPolicy*.yaml; do \
+		if yq -e '.metadata.labels["app.mintel.com/policy-set"] == "app-standards"' "$$f" >/dev/null 2>&1; then \
+			found=1 ;\
+			"$$sanitize" "$$f" | yq eval '.spec.validationActions = ["Deny"]' - \
+				> "$$combined_dir/.kyverno-cli-sanitized-$$(basename $$f)" ;\
+		fi ;\
+	done ;\
+	if [ "$$found" -eq 0 ]; then \
+		echo "No app-standards ValidatingPolicies in $(KYVERNO_POLICY_SUBDIR)" ;\
+		exit 1 ;\
+	fi ;\
+	yq eval-all '.' "$$combined_dir"/.kyverno-cli-sanitized-*.yaml \
+		> "$$combined_dir/combined-app-standards.yaml" ;\
+	rm -f "$$combined_dir"/.kyverno-cli-sanitized-*.yaml
+
+## Validate rendered manifests against app-standards (OPA-parity; usable from any jsonnet repo)
+## Apply to all rendered YAMLs except a small denylist (CRDs / policy-report noise).
+## Policy matchConstraints still decide which resources each rule evaluates.
+kyverno/test-app-standards: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy kyverno/combine-app-standards
+	@errs=0; \
+	combined="$(KYVERNO_APP_STANDARDS_COMBINED)/combined-app-standards.yaml" ;\
+	for dir in $(MANIFEST_DIRS); do \
+		matchedfiles=$$(find $${dir} -type f -name '*.yaml' \
+			! -name '*CustomResourceDefinition*' \
+			! -name '*PolicyReport*' \
+			! -name '*ClusterPolicyReport*' \
+			! -name 'kustomization.yaml' \
+			2>/dev/null) ;\
+		if [ -n "$$matchedfiles" ]; then \
+			if ! printf -- '--resource\0%s\0' $$matchedfiles \
+				| xargs -0 kyverno apply --table "$$combined"; then \
+				errs=$$(( $$errs + 1 )); \
+			fi ;\
+		fi; \
+	done ;\
+	if [ "$${errs:-0}" -gt 0 ]; then \
+		exit 1; \
 	fi
 
 ## Validate rendered workloads against kyverno policies (ClusterPolicy and/or ValidatingPolicy)
@@ -126,3 +188,31 @@ kyverno/test-cel: satoshi/check-deps kyverno/print-cli-version kyverno/prepare-c
 ## Workload sweep against aws.dev CEL policies
 kyverno/test-dev-workloads: KYVERNO_POLICY_SUBDIR=rendered/environments/kyverno/aws.dev/manifests
 kyverno/test-dev-workloads: kyverno/test
+
+## Copy rendered app-standards ValidatingPolicies into prepared/ for kyverno test
+kyverno/prepare-app-standards-test:
+	@test -d $(KYVERNO_CEL_RENDERED) || (echo "rendered aws.dev kyverno missing; run: make k8s/tanka/generate/kyverno" && exit 1)
+	@test -x $(KYVERNO_SANITIZE_CLI) || chmod +x $(KYVERNO_SANITIZE_CLI)
+	@mkdir -p $(KYVERNO_APP_STANDARDS_PREPARED)
+	@rm -f $(KYVERNO_APP_STANDARDS_PREPARED)/*.yaml
+	@set -e; \
+	export CLUSTER_REGION=$${CLUSTER_REGION:-eu-west-2}; \
+	found=0; \
+	for f in $(KYVERNO_CEL_RENDERED)/policies.kyverno.io-*ValidatingPolicy*.yaml; do \
+		[ -f "$$f" ] || continue; \
+		if yq -e '.metadata.labels["app.mintel.com/policy-set"] == "app-standards"' "$$f" >/dev/null 2>&1; then \
+			found=1; \
+			name=$$(yq -r '.metadata.name' "$$f"); \
+			"$(KYVERNO_SANITIZE_CLI)" "$$f" | yq eval '.spec.validationActions = ["Deny"]' - \
+				> "$(KYVERNO_APP_STANDARDS_PREPARED)/$$name.yaml"; \
+		fi; \
+	done; \
+	if [ "$$found" -eq 0 ]; then \
+		echo "No app-standards ValidatingPolicies in $(KYVERNO_CEL_RENDERED)" ;\
+		exit 1 ;\
+	fi
+
+## Unit fixtures for app-standards (pass/fail/skip)
+kyverno/test-app-standards-unit: satoshi/check-deps kyverno/print-cli-version kyverno/prepare-app-standards-test
+	@test -f $(KYVERNO_APP_STANDARDS_TEST_DIR)/kyverno-test.yaml || (echo "missing $(KYVERNO_APP_STANDARDS_TEST_DIR)/kyverno-test.yaml" && exit 1)
+	kyverno test $(KYVERNO_APP_STANDARDS_TEST_DIR)
