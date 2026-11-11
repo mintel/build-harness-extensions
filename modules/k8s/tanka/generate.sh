@@ -180,12 +180,11 @@ wait
 # Find all the rendered environments (ignore local since we should not render this anyway)
 rendered_envs=$(find rendered/environments -type d -not -path "*/local" | cut -d/ -f2,3,4 | sort | uniq  | grep -v "environments$")
 # Get a list of known tanka environments
-ENV_LIST_FILE="$(mktemp)"
-tk env list --names > "$ENV_LIST_FILE"
+envs=$(tk env list --names)
+# Check that the rendered environment is known - if not, delete it
 for rendered_env in $rendered_envs; do
-  if ! grep -qxF -- "$rendered_env" "$ENV_LIST_FILE"; then
+  if ! echo "$envs" | grep -q "$rendered_env"; then
     echo "Found rendered directory ${rendered_env} without an associated environment (deleting)"
     rm -rf "./rendered/${rendered_env}"
   fi
 done
-rm -f "$ENV_LIST_FILE"
