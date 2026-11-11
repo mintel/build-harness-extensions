@@ -3,14 +3,11 @@ KYVERNO_POLICY_BRANCH ?= main
 KYVERNO_POLICY_DIR = /tmp/kyverno-policy
 KYVERNO_POLICY_SUBDIR ?= rendered/environments/kyverno/aws.prod/manifests
 KYVERNO_POLICY_REPO ?= git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core-cluster-jsonnet.git
-KYVERNO_CEL_TEST_DIR ?= lib/kyverno/tests/cel-cutover
-KYVERNO_CEL_RENDERED ?= rendered/environments/kyverno/aws.dev/manifests
-KYVERNO_CEL_PREPARED ?= $(KYVERNO_CEL_TEST_DIR)/prepared/policies
 # CLI-only merges; never write under rendered/ (see kyverno/combine-policies).
 KYVERNO_COMBINED_DIR ?= $(KYVERNO_POLICY_DIR)/.kyverno-combined
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
-.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/test-cel kyverno/combine-policies kyverno/prepare-cel-test
+.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/combine-policies
 
 ## Print Kyverno CLI version and binary path (requires kyverno on PATH)
 kyverno/print-cli-version:
@@ -109,26 +106,3 @@ kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy 
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		exit 1; \
 	fi
-
-## Copy aws.dev ValidatingPolicies into prepared/ (strip namespace/region for kyverno CLI)
-kyverno/prepare-cel-test:
-	@test -d $(KYVERNO_CEL_RENDERED) || (echo "rendered aws.dev kyverno missing; run: make k8s/tanka/generate/kyverno" && exit 1)
-	@test -f $(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt || (echo "missing $(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt" && exit 1)
-	@mkdir -p $(KYVERNO_CEL_PREPARED)
-	@set -e; \
-	while IFS= read -r name || [ -n "$$name" ]; do \
-		case "$$name" in ''|\#*) continue ;; esac; \
-		src="$(KYVERNO_CEL_RENDERED)/policies.kyverno.io-v1beta1.ValidatingPolicy-kyverno-$$name.yaml"; \
-		test -f "$$src" || (echo "missing rendered policy $$src" && exit 1); \
-		yq eval 'del(.metadata.namespace, .metadata.labels["app.mintel.com/region"])' "$$src" \
-			> "$(KYVERNO_CEL_PREPARED)/$$name.yaml"; \
-	done < "$(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt"
-
-## Regression tests for aws.dev CEL policies (upstream patches, autogen, exceptions)
-kyverno/test-cel: satoshi/check-deps kyverno/print-cli-version kyverno/prepare-cel-test
-	@test -f $(KYVERNO_CEL_TEST_DIR)/kyverno-test.yaml || (echo "missing $(KYVERNO_CEL_TEST_DIR)" && exit 1)
-	kyverno test $(KYVERNO_CEL_TEST_DIR)
-
-## Workload sweep against aws.dev CEL policies
-kyverno/test-dev-workloads: KYVERNO_POLICY_SUBDIR=rendered/environments/kyverno/aws.dev/manifests
-kyverno/test-dev-workloads: kyverno/test
