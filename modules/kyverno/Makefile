@@ -6,7 +6,6 @@ KYVERNO_POLICY_REPO ?= git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core
 KYVERNO_CEL_TEST_DIR ?= lib/kyverno/tests/cel-cutover
 KYVERNO_CEL_RENDERED ?= rendered/environments/kyverno/aws.dev/manifests
 KYVERNO_CEL_PREPARED ?= $(KYVERNO_CEL_TEST_DIR)/prepared/policies
-KYVERNO_SANITIZE_CLI ?= lib/kyverno/tests/sanitize-for-cli.sh
 # CLI-only merges; never write under rendered/ (see kyverno/combine-policies).
 KYVERNO_COMBINED_DIR ?= $(KYVERNO_POLICY_DIR)/.kyverno-combined
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
@@ -40,11 +39,13 @@ kyverno/clone-policy: kyverno/check-env
 	fi ;\
 	git clone --depth=1 $(KYVERNO_POLICY_REPO) -b $(KYVERNO_POLICY_BRANCH) $(KYVERNO_POLICY_DIR) ;\
 
-## Merge ClusterPolicy / ValidatingPolicy / PolicyException YAML for kyverno apply
+## Merge ClusterPolicy / ValidatingPolicy / PolicyException YAML for kyverno apply.
+## Strip namespace + region label so kyverno CLI accepts rendered manifests (same for
+## ClusterPolicy and ValidatingPolicy; no core-cluster-jsonnet sanitize script).
+## Skip app-standards ValidatingPolicies (OPA→Kyverno port; not ready for default CI).
 kyverno/combine-policies:
 	@manifest_dir="$(KYVERNO_POLICY_DIR)/$(KYVERNO_POLICY_SUBDIR)" ;\
 	combined_dir="$(KYVERNO_COMBINED_DIR)" ;\
-	sanitize="$(CURDIR)/$(KYVERNO_SANITIZE_CLI)" ;\
 	set -e ;\
 	mkdir -p "$$combined_dir" ;\
 	rm -f "$$combined_dir"/combined-*.yaml "$$combined_dir"/.kyverno-cli-sanitized-*.yaml ;\
@@ -55,10 +56,16 @@ kyverno/combine-policies:
 	fi ;\
 	if compgen -G 'policies.kyverno.io-*ValidatingPolicy*.yaml' > /dev/null; then \
 		for f in policies.kyverno.io-*ValidatingPolicy*.yaml; do \
-			"$$sanitize" "$$f" > "$$combined_dir/.kyverno-cli-sanitized-$$(basename $$f)"; \
+			if yq -e '.metadata.labels["app.mintel.com/policy-set"] == "app-standards"' "$$f" >/dev/null 2>&1; then \
+				continue ;\
+			fi ;\
+			yq eval 'del(.metadata.namespace, .metadata.labels["app.mintel.com/region"])' "$$f" \
+				> "$$combined_dir/.kyverno-cli-sanitized-$$(basename $$f)" ;\
 		done ;\
-		yq eval-all '.' "$$combined_dir"/.kyverno-cli-sanitized-*.yaml \
-			> "$$combined_dir/combined-validating-policies.yaml" ;\
+		if compgen -G "$$combined_dir"/.kyverno-cli-sanitized-*.yaml > /dev/null; then \
+			yq eval-all '.' "$$combined_dir"/.kyverno-cli-sanitized-*.yaml \
+				> "$$combined_dir/combined-validating-policies.yaml" ;\
+		fi ;\
 		rm -f "$$combined_dir"/.kyverno-cli-sanitized-*.yaml ;\
 	fi ;\
 	if compgen -G '*PolicyException*.yaml' > /dev/null; then \
@@ -103,19 +110,18 @@ kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy 
 		exit 1; \
 	fi
 
-## Copy aws.dev ValidatingPolicies into prepared/ (envsubst CLUSTER_REGION for kyverno CLI)
+## Copy aws.dev ValidatingPolicies into prepared/ (strip namespace/region for kyverno CLI)
 kyverno/prepare-cel-test:
 	@test -d $(KYVERNO_CEL_RENDERED) || (echo "rendered aws.dev kyverno missing; run: make k8s/tanka/generate/kyverno" && exit 1)
 	@test -f $(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt || (echo "missing $(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt" && exit 1)
-	@test -x $(KYVERNO_SANITIZE_CLI) || chmod +x $(KYVERNO_SANITIZE_CLI)
 	@mkdir -p $(KYVERNO_CEL_PREPARED)
 	@set -e; \
-	export CLUSTER_REGION=$${CLUSTER_REGION:-eu-west-2}; \
 	while IFS= read -r name || [ -n "$$name" ]; do \
 		case "$$name" in ''|\#*) continue ;; esac; \
 		src="$(KYVERNO_CEL_RENDERED)/policies.kyverno.io-v1beta1.ValidatingPolicy-kyverno-$$name.yaml"; \
 		test -f "$$src" || (echo "missing rendered policy $$src" && exit 1); \
-		"$(KYVERNO_SANITIZE_CLI)" "$$src" > "$(KYVERNO_CEL_PREPARED)/$$name.yaml"; \
+		yq eval 'del(.metadata.namespace, .metadata.labels["app.mintel.com/region"])' "$$src" \
+			> "$(KYVERNO_CEL_PREPARED)/$$name.yaml"; \
 	done < "$(KYVERNO_CEL_TEST_DIR)/policy-manifest.txt"
 
 ## Regression tests for aws.dev CEL policies (upstream patches, autogen, exceptions)
