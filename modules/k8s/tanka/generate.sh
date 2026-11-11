@@ -177,14 +177,48 @@ wait
 
 # Handle case where environment is deleted
 #
-# Find all the rendered environments (ignore local since we should not render this anyway)
-rendered_envs=$(find rendered/environments -type d -not -path "*/local" | cut -d/ -f2,3,4 | sort | uniq  | grep -v "environments$")
-# Get a list of known tanka environments
-envs=$(tk env list --names)
-# Check that the rendered environment is known - if not, delete it
+# Find all the rendered *leaf* environments, i.e. rendered/environments/<account>/<env>.
+# (mindepth/maxdepth 2 skips parents like environments/aws.dev, which tanka never lists.)
+# Ignore local since we should not render this anyway.
+rendered_envs=$(find rendered/environments -mindepth 2 -maxdepth 2 -type d -not -path "*/local" | sed 's|^rendered/||' | sort)
+
+# Get a list of known tanka environments. Use a file rather than `echo | grep -q`
+# so there is no pipe for grep -q to close early under pipefail.
+ENV_LIST_FILE="$(mktemp)"
+if ! tk env list --names > "$ENV_LIST_FILE"; then
+  echo "Error: 'tk env list --names' failed; skipping cleanup of rendered directories" >&2
+  rm -f "$ENV_LIST_FILE"
+  exit 1
+fi
+env_count=$(wc -l < "$ENV_LIST_FILE")
+echo "Cleanup check: ${env_count} known environment(s) from tk"
+# An empty list would make every rendered directory look like an orphan.
+if [[ "$env_count" -eq 0 ]]; then
+  echo "Error: 'tk env list --names' returned no environments; skipping cleanup of rendered directories" >&2
+  rm -f "$ENV_LIST_FILE"
+  exit 1
+fi
+
+# Collect rendered environments that are not known to tanka (exact line match).
+orphans=()
 for rendered_env in $rendered_envs; do
-  if ! echo "$envs" | grep -q "$rendered_env"; then
-    echo "Found rendered directory ${rendered_env} without an associated environment (deleting)"
-    rm -rf "./rendered/${rendered_env}"
+  if ! grep -qxF -- "$rendered_env" "$ENV_LIST_FILE"; then
+    orphans+=( "$rendered_env" )
   fi
+done
+rm -f "$ENV_LIST_FILE"
+
+# Safety cap: a real environment removal affects a handful of directories. If far more
+# look orphaned, something is wrong with the env list, so stop instead of deleting.
+MAX_CLEANUP_DELETIONS="${MAX_CLEANUP_DELETIONS:-5}"
+if [[ "${#orphans[@]}" -gt "$MAX_CLEANUP_DELETIONS" ]]; then
+  echo "Error: ${#orphans[@]} rendered directories have no associated environment, more than the limit of ${MAX_CLEANUP_DELETIONS}. Refusing to delete:" >&2
+  printf '  %s\n' "${orphans[@]}" >&2
+  echo "If this is intended, re-run with MAX_CLEANUP_DELETIONS=<n> or delete them manually." >&2
+  exit 1
+fi
+
+for rendered_env in "${orphans[@]}"; do
+  echo "Found rendered directory ${rendered_env} without an associated environment (deleting)"
+  rm -rf "./rendered/${rendered_env}"
 done
