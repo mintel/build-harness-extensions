@@ -5,9 +5,15 @@ KYVERNO_POLICY_SUBDIR ?= rendered/environments/kyverno/aws.prod/manifests
 KYVERNO_POLICY_REPO ?= git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core-cluster-jsonnet.git
 # CLI-only merges; never write under rendered/ (see kyverno/combine-policies).
 KYVERNO_COMBINED_DIR ?= $(KYVERNO_POLICY_DIR)/.kyverno-combined
+# Declarative `kyverno test` harness: fixtures in-repo, staged under /tmp for the CLI.
+KYVERNO_UNIT_TEST_DIR ?= lib/kyverno/tests
+KYVERNO_UNIT_SUITE ?= $(KYVERNO_UNIT_TEST_DIR)/exceptions
+KYVERNO_UNIT_RENDERED ?= rendered/environments/kyverno/aws.dev/manifests
+KYVERNO_UNIT_EXCEPTIONS_SRC ?= lib/kyverno/exceptions
+KYVERNO_UNIT_STAGING ?= /tmp/kyverno-unit-test
 MANIFEST_DIRS:=$(shell find rendered/ -type d -name manifests 2>/dev/null)
 
-.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/combine-policies
+.PHONY: kyverno/check-env kyverno/print-cli-version kyverno/clone-policy kyverno/test kyverno/combine-policies kyverno/prepare-unit-test kyverno/test-unit
 
 ## Print Kyverno CLI version and binary path (requires kyverno on PATH)
 kyverno/print-cli-version:
@@ -106,3 +112,41 @@ kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy 
 	if [ "$${errs:-0}" -gt 0 ]; then \
 		exit 1; \
 	fi
+
+## Stage fixtures + sanitized policies under /tmp for `kyverno test` (nothing written under lib/).
+kyverno/prepare-unit-test:
+	@test -d "$(KYVERNO_UNIT_RENDERED)" || (echo "missing $(KYVERNO_UNIT_RENDERED); run: make k8s/tanka/generate/kyverno" && exit 1)
+	@test -f "$(KYVERNO_UNIT_SUITE)/kyverno-test.yaml" || (echo "missing $(KYVERNO_UNIT_SUITE)/kyverno-test.yaml" && exit 1)
+	@rm -rf "$(KYVERNO_UNIT_STAGING)"
+	@mkdir -p "$(KYVERNO_UNIT_STAGING)/policies" "$(KYVERNO_UNIT_STAGING)/exceptions" "$(KYVERNO_UNIT_STAGING)/resources"
+	@cp "$(KYVERNO_UNIT_SUITE)/kyverno-test.yaml" "$(KYVERNO_UNIT_STAGING)/kyverno-test.yaml"
+	@cp "$(KYVERNO_UNIT_SUITE)/resources/"*.yaml "$(KYVERNO_UNIT_STAGING)/resources/"
+	@# Source-of-truth exceptions (skip legacy TFC ClusterPolicy carve-out — not unit-tested).
+	@for f in "$(KYVERNO_UNIT_EXCEPTIONS_SRC)"/*.yaml; do \
+		case "$$(basename "$$f")" in ignore-tfc-workspace-deletes.yaml) continue ;; esac; \
+		cp "$$f" "$(KYVERNO_UNIT_STAGING)/exceptions/"; \
+	done
+	@set -e; \
+	found=0; \
+	for f in "$(KYVERNO_UNIT_RENDERED)"/policies.kyverno.io-*ValidatingPolicy*.yaml; do \
+		[ -f "$$f" ] || continue; \
+		if yq -e '.metadata.labels["app.mintel.com/policy-set"] == "app-standards"' "$$f" >/dev/null 2>&1; then \
+			continue; \
+		fi; \
+		found=1; \
+		name=$$(yq -r '.metadata.name' "$$f"); \
+		yq eval 'del(.metadata.namespace, .metadata.labels["app.mintel.com/region"])' "$$f" \
+			> "$(KYVERNO_UNIT_STAGING)/policies/$${name}.yaml"; \
+	done; \
+	if [ "$$found" -eq 0 ]; then \
+		echo "No ValidatingPolicies found in $(KYVERNO_UNIT_RENDERED)" >&2; \
+		exit 1; \
+	fi; \
+	printf '==> staged %s (%s policies, %s exceptions)\n' \
+		"$(KYVERNO_UNIT_STAGING)" \
+		"$$(ls -1 "$(KYVERNO_UNIT_STAGING)/policies" | wc -l)" \
+		"$$(ls -1 "$(KYVERNO_UNIT_STAGING)/exceptions" | wc -l)"
+
+## Run declarative `kyverno test` from the /tmp staging dir.
+kyverno/test-unit: satoshi/check-deps kyverno/print-cli-version kyverno/prepare-unit-test
+	kyverno test "$(KYVERNO_UNIT_STAGING)"
