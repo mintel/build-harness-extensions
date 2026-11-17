@@ -5,6 +5,9 @@ KYVERNO_POLICY_SUBDIR ?= rendered/environments/kyverno/aws.prod/manifests
 KYVERNO_POLICY_REPO ?= git@gitlab.com:mintel/satoshi/kubernetes/jsonnet/sre/core-cluster-jsonnet.git
 # CLI-only merges; never write under rendered/ (see kyverno/combine-policies).
 KYVERNO_COMBINED_DIR ?= $(KYVERNO_POLICY_DIR)/.kyverno-combined
+# Parallel kyverno apply workers (CEL ValidatingPolicy startup cost is high per process).
+KYVERNO_APPLY_JOBS ?= 8
+KYVERNO_APPLY_LOG_DIR ?= /tmp/kyverno-apply-logs
 # Declarative `kyverno test` harness: fixtures in-repo, staged under /tmp for the CLI.
 KYVERNO_UNIT_TEST_DIR ?= lib/kyverno/tests
 KYVERNO_UNIT_SUITE ?= $(KYVERNO_UNIT_TEST_DIR)/exceptions
@@ -76,10 +79,13 @@ kyverno/combine-policies:
 			> "$$combined_dir/combined-policy-exceptions.yaml" ;\
 	fi
 
-## Validate rendered workloads against kyverno policies (ClusterPolicy and/or ValidatingPolicy)
+## Validate rendered workloads against kyverno policies (ClusterPolicy and/or ValidatingPolicy).
+## Runs up to KYVERNO_APPLY_JOBS applies in parallel; captures each dir's --table output and
+## replays logs in work-list order so CI output stays readable (no interleaved tables).
 kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy kyverno/combine-policies
-	@errs=0; \
-	combined_dir="$(KYVERNO_COMBINED_DIR)" ;\
+	@combined_dir="$(KYVERNO_COMBINED_DIR)" ;\
+	log_dir="$(KYVERNO_APPLY_LOG_DIR)" ;\
+	jobs="$(KYVERNO_APPLY_JOBS)" ;\
 	policy_args="" ;\
 	if [ -f "$$combined_dir/combined-cluster-policies.yaml" ]; then \
 		policy_args="$$policy_args $$combined_dir/combined-cluster-policies.yaml" ;\
@@ -95,6 +101,9 @@ kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy 
 	if [ -f "$$combined_dir/combined-policy-exceptions.yaml" ]; then \
 		exc_arg="--exceptions $$combined_dir/combined-policy-exceptions.yaml" ;\
 	fi ;\
+	rm -rf "$$log_dir" ;\
+	mkdir -p "$$log_dir" ;\
+	work_list=$$(mktemp) ;\
 	for dir in $(MANIFEST_DIRS); do \
 		matchedfiles=$$(find $${dir} -type f \( \
 			-name 'apps-v1.Deployment*.yaml' -o \
@@ -103,14 +112,52 @@ kyverno/test: satoshi/check-deps kyverno/print-cli-version kyverno/clone-policy 
 			-name 'batch-v1.CronJob*' -o \
 			-name 'batch-v1.Job*' \) 2>/dev/null) ;\
 		if [ -n "$$matchedfiles" ]; then \
-			if ! printf -- '--resource\0%s\0' $$matchedfiles \
-				| xargs -0 kyverno apply --table $$policy_args $$exc_arg; then \
-				errs=$$(( $$errs + 1 )); \
-			fi ;\
-		fi; \
+			printf '%s\n' "$$dir" >> "$$work_list" ;\
+		fi ;\
 	done ;\
+	if [ ! -s "$$work_list" ]; then \
+		rm -f "$$work_list" ;\
+		echo "No workload manifests found under rendered/" ;\
+		exit 0 ;\
+	fi ;\
+	printf '==> kyverno apply: %s dirs, %s parallel jobs\n' "$$(wc -l < "$$work_list")" "$$jobs" ;\
+	export KYVERNO_POLICY_ARGS="$$policy_args" KYVERNO_EXC_ARG="$$exc_arg" KYVERNO_APPLY_LOG_DIR="$$log_dir" ;\
+	xargs -P "$$jobs" -a "$$work_list" -I{} sh -c '\
+		dir="$$1" ;\
+		safe=$$(printf "%s" "$$dir" | sed "s|[ /]|_|g") ;\
+		log="$$KYVERNO_APPLY_LOG_DIR/$$safe.log" ;\
+		matchedfiles=$$(find "$$dir" -type f \( \
+			-name "apps-v1.Deployment*.yaml" -o \
+			-name "apps-v1.StatefulSet*" -o \
+			-name "apps-v1.DaemonSet*" -o \
+			-name "batch-v1.CronJob*" -o \
+			-name "batch-v1.Job*" \) 2>/dev/null) ;\
+		{ \
+			echo "===== $$dir =====" ;\
+			printf -- "--resource\0%s\0" $$matchedfiles \
+				| xargs -0 kyverno apply --table $$KYVERNO_POLICY_ARGS $$KYVERNO_EXC_ARG ;\
+		} >"$$log" 2>&1 ;\
+		ec=$$? ;\
+		echo $$ec > "$$KYVERNO_APPLY_LOG_DIR/$$safe.ec" ;\
+		exit 0 \
+	' _ {} ;\
+	errs=0 ;\
+	while IFS= read -r dir; do \
+		safe=$$(printf "%s" "$$dir" | sed "s|[ /]|_|g") ;\
+		log="$$log_dir/$$safe.log" ;\
+		ec_file="$$log_dir/$$safe.ec" ;\
+		ec=0 ;\
+		[ -f "$$ec_file" ] && ec=$$(cat "$$ec_file") ;\
+		cat "$$log" ;\
+		if [ "$$ec" -ne 0 ]; then \
+			errs=$$((errs + 1)) ;\
+			echo "==> FAIL $$dir (exit $$ec)" ;\
+		fi ;\
+	done < "$$work_list" ;\
+	rm -f "$$work_list" ;\
 	if [ "$${errs:-0}" -gt 0 ]; then \
-		exit 1; \
+		echo "==> kyverno apply failed in $$errs directory(ies)" ;\
+		exit 1 ;\
 	fi
 
 ## Stage fixtures + sanitized policies under /tmp for `kyverno test` (nothing written under lib/).
